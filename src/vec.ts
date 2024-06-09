@@ -30,7 +30,7 @@ export class Vector<N extends number> {
 
   add(v: Vector<N>) {
     for (let i = 0; i < this.vec.length; i++) {
-      this.vec[i]! += v.get(i)
+      this.vec[i] += v.get(i)
     }
   }
 

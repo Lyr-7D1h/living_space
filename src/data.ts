@@ -22,25 +22,40 @@ export class ImageBuffer {
     )
   }
 
-  // width() {
-  //   return this.img.width
-  // }
+  get width() {
+    return this.data.width
+  }
 
-  // height() {
-  //   return this.img.height
-  // }
-
-  // pixels() {
-  //   if (!this.pixelsLoaded) throw new Error('pixels not loaded')
-  //   return this.pixeldata
-  // }
+  get height() {
+    return this.data.height
+  }
 
   fill(x: number, y: number, dx: number, dy: number, c: Color) {
     const v = [c.r, c.g, c.b, 255]
     const width = this.data.width * 4
-    for (let o = y * width; o < (y + dy) * width; o += width) {
-      for (let d = x * 4; d < (x + dx) * 4; d++) {
+    for (let o = y * width; o <= (y + dy) * width; o += width) {
+      for (let d = x * 4; d <= (x + dx) * 4; d++) {
         this.buffer[o + d] = v[d % 4]!
+      }
+    }
+  }
+
+  gradient(
+    x: number,
+    y: number,
+    dx: number,
+    dy: number,
+    c: Color,
+    percentage: number,
+  ) {
+    const v = [c.r, c.g, c.b, 255]
+    const width = this.data.width * 4
+    for (let o = y * width; o <= (y + dy) * width; o += width) {
+      for (let d = x * 4; d <= (x + dx) * 4; d++) {
+        const i = o + d
+        const diff = v[d % 4]! - this.buffer[i]!
+        // console.log(Math.sign(diff) * Math.abs(diff) * percentage)
+        this.buffer[i] += Math.sign(diff) * Math.abs(diff) * percentage
       }
     }
   }
@@ -55,8 +70,8 @@ export class ImageBuffer {
     const width = this.data.width * 4
     let i = 0
     let j = 0
-    for (let o = y * width; o < (y + dy) * width; o += width) {
-      for (let d = x * 4; d < (x + dx) * 4; d++) {
+    for (let o = y * width; o <= (y + dy) * width; o += width) {
+      for (let d = x * 4; d <= (x + dx) * 4; d++) {
         this.buffer[o + d] = value[j]![i]!
         i++
       }
@@ -73,9 +88,9 @@ export class ImageBuffer {
     dy?: number,
   ): Uint8ClampedArray | Uint8ClampedArray[] {
     if (typeof dx !== 'undefined' && typeof dy !== 'undefined') {
-      const width = this.data.width * 4
+      const width = this.width * 4
       const r = []
-      for (let o = y * width; o < (y + dy) * width; o += width) {
+      for (let o = y * width; o <= (y + dy) * width; o += width) {
         r.push(this.buffer.slice(o + x * 4, o + (x + dx) * 4))
       }
       return r

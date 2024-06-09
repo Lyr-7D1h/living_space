@@ -1,13 +1,34 @@
 export class Color {
-  r: number
-  g: number
-  b: number
+  private readonly c: number[]
 
   constructor(r: number, g: number, b: number)
   constructor(...color: number[]) {
-    this.r = color[0]!
-    this.g = color[1]!
-    this.b = color[2]!
+    if (color.length !== 3) throw Error('Color has to have 3 elements')
+    this.c = color
+  }
+
+  get r() {
+    return this.c[0]!
+  }
+
+  set r(v: number) {
+    this.c[0] = v
+  }
+
+  get g() {
+    return this.c[1]!
+  }
+
+  set g(v: number) {
+    this.c[1] = v
+  }
+
+  get b() {
+    return this.c[2]!
+  }
+
+  set b(v: number) {
+    this.c[2] = v
   }
 
   clone(): Color {
