@@ -1,4 +1,5 @@
 import { Color } from './color'
+import { PMF } from './random'
 import { type Vector, vec2 } from './vec'
 
 export interface CreatureArgs {
@@ -6,6 +7,7 @@ export interface CreatureArgs {
   size: number
   color: Color
   preference: number[]
+  speed: number
 }
 
 export const neighbors = [
@@ -24,6 +26,8 @@ export class Creature {
   position: Vector<2>
   size: number
   color: Color
+  speed: number
+  private prev: number
 
   static random(args?: Partial<CreatureArgs>) {
     const x = () => Math.floor(Math.random() * window.innerWidth)
@@ -37,6 +41,7 @@ export class Creature {
       color: new Color(c(), c(), c()),
       size: 2,
       preference,
+      speed: 1 + Math.round(Math.random() * 4),
       ...args,
     })
   }
@@ -45,11 +50,17 @@ export class Creature {
     this.position = args.position
     this.size = args.size
     this.color = args.color
+    this.speed = args.speed
+    this.prev = 4
   }
 
   /** take a step into a direction based on characteristics */
   step() {
-    const m = neighbors[Math.floor(Math.random() * neighbors.length)]!
-    this.position.add(m)
+    const probs = [20, 20, 20, 5, 0, 5, 20, 20, 20]
+    probs[this.prev] = 0
+    const i = new PMF(...probs).draw()
+    const m = neighbors[i]!
+    this.position.add(m.clone().scale(this.speed))
+    this.prev = i
   }
 }

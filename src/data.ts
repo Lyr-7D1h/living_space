@@ -1,6 +1,7 @@
 // use p5 as ref https://p5js.org/reference/#/p5.Image
 
 import { type Color } from './color'
+import { Vector } from './vec'
 
 // https://github.dev/ronikaufman/poetical_computer_vision/blob/main/days01-10/day01/day01.pde
 export class ImageBuffer {
@@ -59,6 +60,8 @@ export class ImageBuffer {
       }
     }
   }
+
+  gradientCircle(p: Vector<2>, radius: number, c: Color, percentage: number) {}
 
   set(
     x: number,

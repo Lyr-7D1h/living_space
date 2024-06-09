@@ -32,6 +32,14 @@ export class Vector<N extends number> {
     for (let i = 0; i < this.vec.length; i++) {
       this.vec[i] += v.get(i)
     }
+    return this
+  }
+
+  scale(s: number) {
+    for (let i = 0; i < this.vec.length; i++) {
+      this.vec[i] *= s
+    }
+    return this
   }
 
   get x() {

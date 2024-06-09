@@ -1,7 +1,6 @@
 import { Color } from './color'
 import { COLORING_PERCENT, CREATURE_SIZE } from './constants'
 import { Creature } from './creature'
-import { Map } from './map'
 import { debug } from './log'
 import { vec2 } from './vec'
 import { ImageBuffer } from './data'
@@ -9,14 +8,15 @@ import { ImageBuffer } from './data'
 function perf(cb: () => void) {
   const start = Date.now()
   cb()
-  document.getElementById('debug')!.innerHTML = `${Date.now() - start}ms`
+  const d = Date.now() - start
+  document.getElementById('debug')!.innerHTML =
+    `${d}ms<br />${Math.round(1000 / d)}fps`
 }
 
 /** responsible for building and rendering the entire simulated world */
 export class Simulation {
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
-  map: Map
   creatures: Creature[]
 
   constructor() {
@@ -24,9 +24,22 @@ export class Simulation {
     this.ctx = this.canvas.getContext('2d')!
     this.ctx.canvas.width = window.innerWidth
     this.ctx.canvas.height = window.innerHeight
+
+    // initialize canvas with white pixels, looks slightly better on borders
+    const b = new ImageBuffer(
+      new ImageData(window.innerHeight, window.innerHeight),
+    )
+    b.fill(
+      0,
+      0,
+      window.innerHeight,
+      window.innerHeight,
+      new Color(255, 255, 255),
+    )
+    this.ctx.putImageData(b.data, 0, 0)
+
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
-    this.map = new Map(this.canvas.width, this.canvas.height)
     this.creatures = []
   }
 
@@ -53,7 +66,7 @@ export class Simulation {
   }
 
   private drawLoop() {
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 1; i++) {
       this.creatures.push(Creature.random())
     }
 
@@ -119,21 +132,21 @@ export class Simulation {
   }
 
   /** debug grid */
-  grid() {
-    this.ctx.stroke()
-    for (let x = 0; x < this.map.width; x++) {
-      this.ctx.moveTo(x * this.map.tileWidth, 0)
-      this.ctx.lineTo(
-        x * this.map.tileWidth,
-        this.map.height * this.map.tileHeight,
-      )
-    }
-    for (let y = 0; y < this.map.height; y++) {
-      this.ctx.moveTo(0, y * this.map.tileHeight)
-      this.ctx.lineTo(
-        this.map.width * this.map.tileWidth,
-        y * this.map.tileHeight,
-      )
-    }
-  }
+  // grid() {
+  //   this.ctx.stroke()
+  //   for (let x = 0; x < this.map.width; x++) {
+  //     this.ctx.moveTo(x * this.map.tileWidth, 0)
+  //     this.ctx.lineTo(
+  //       x * this.map.tileWidth,
+  //       this.map.height * this.map.tileHeight,
+  //     )
+  //   }
+  //   for (let y = 0; y < this.map.height; y++) {
+  //     this.ctx.moveTo(0, y * this.map.tileHeight)
+  //     this.ctx.lineTo(
+  //       this.map.width * this.map.tileWidth,
+  //       y * this.map.tileHeight,
+  //     )
+  //   }
+  // }
 }
