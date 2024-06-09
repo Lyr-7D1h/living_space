@@ -6,6 +6,7 @@ export interface CreatureArgs {
   position: Vector<2>
   size: number
   color: Color
+  coloringPercentage: number
   preference: number[]
   speed: number
 }
@@ -41,6 +42,7 @@ export class Creature {
       color: new Color(c(), c(), c()),
       size: 2,
       preference,
+      coloringPercentage: 0.01,
       speed: 1 + Math.round(Math.random() * 4),
       ...args,
     })

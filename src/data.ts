@@ -61,7 +61,22 @@ export class ImageBuffer {
     }
   }
 
-  gradientCircle(p: Vector<2>, radius: number, c: Color, percentage: number) {}
+  gradientCircle(p: Vector<2>, r: number, c: Color, percentage: number) {
+    // FIXME
+    const { x, y } = p
+    const width = this.data.width * 4
+    const v = [c.r, c.g, c.b, 255]
+    const dy = r * 2 + 1
+    let j = p.y - r
+    for (let o = (y - r) * width; o <= (y + dy) * width; o += width) {
+      const dx = 2 * r * 4 + 1 - 2 * Math.abs(j - p.y)
+      for (let d = (x - dx) * 4; d <= (x + dx * 2 + 1) * 4; d++) {
+        const i = o + d
+        this.buffer[i] += 255
+      }
+      j++
+    }
+  }
 
   set(
     x: number,

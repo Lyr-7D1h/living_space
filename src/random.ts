@@ -15,7 +15,6 @@ export class PMF {
 
   /** draw a random number from pmf */
   draw() {
-    console.log(CDF.fromPdf(this))
     return CDF.fromPdf(this).draw()
   }
 }

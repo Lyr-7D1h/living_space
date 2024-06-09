@@ -25,19 +25,6 @@ export class Simulation {
     this.ctx.canvas.width = window.innerWidth
     this.ctx.canvas.height = window.innerHeight
 
-    // initialize canvas with white pixels, looks slightly better on borders
-    const b = new ImageBuffer(
-      new ImageData(window.innerHeight, window.innerHeight),
-    )
-    b.fill(
-      0,
-      0,
-      window.innerHeight,
-      window.innerHeight,
-      new Color(255, 255, 255),
-    )
-    this.ctx.putImageData(b.data, 0, 0)
-
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
     this.creatures = []
@@ -66,13 +53,15 @@ export class Simulation {
   }
 
   private drawLoop() {
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 1000; i++) {
       this.creatures.push(Creature.random())
     }
 
-    const prevData = new ImageBuffer(
+    const map = new ImageBuffer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
     )
+    // initialize canvas with white pixels, looks slightly better on borders
+    map.fill(0, 0, map.width, map.height, new Color(255, 255, 255))
 
     // setInterval(() => {
     //   perf(() => {
@@ -81,12 +70,14 @@ export class Simulation {
     // }, TIMESTEP_MS)
     requestAnimationFrame(() => {
       perf(() => {
-        this.draw(prevData)
+        this.draw(map)
       })
     })
   }
 
   private draw(map: ImageBuffer) {
+    // map.gradientCircle(vec2(500, 500), 5, new Color(255, 0, 0), 0.4)
+    // this.ctx.putImageData(map.data, 0, 0)
     for (const c of this.creatures) {
       // update character
       c.step()
