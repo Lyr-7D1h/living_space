@@ -53,72 +53,27 @@ export class Simulation {
   }
 
   private drawLoop() {
-    const data = new ImageBuffer(
+    for (let i = 0; i < 3000; i++) {
+      const x = () => Math.floor(Math.random() * this.canvas.width)
+      const y = () => Math.floor(Math.random() * this.canvas.height)
+      const r = () => Math.floor(Math.random() * 255)
+      this.creatures.push(
+        new Creature({
+          position: vec2(x(), y()),
+          color: new Color(r(), r(), r()),
+          size: 2,
+        }),
+      )
+    }
+
+    const prevData = new ImageBuffer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
     )
-    let prevData = data.clone()
+    // setInterval(() => {}, TIMESTEP_MS)
 
-    setInterval(() => {
-      const start = Date.now()
-
-      // this.update()
-      // this.draw(buffer)
-      const history: Array<[Vector<2>, Uint8ClampedArray[]]> = []
-      for (const c of this.creatures) {
-        // update history
-        const pp = c.position
-        const prevColor = prevData.get(
-          pp.x - 2,
-          pp.y - 2,
-          CREATURE_SIZE + 2,
-          CREATURE_SIZE + 2,
-        )
-        history.push([pp.clone(), prevColor.slice(0)])
-
-        // update character
-        c.step()
-        const { x, y } = c.position
-        // bound x,y
-        if (x < 0) c.position.set(0, this.canvas.width - x)
-        if (x > this.canvas.width - 1) c.position.set(0, x % this.canvas.width)
-        if (y < 0) c.position.set(1, this.canvas.height - y)
-        if (y > this.canvas.height - 1) {
-          c.position.set(1, y % this.canvas.height)
-        }
-      }
-      // set prev to current state
-      prevData = data.clone()
-      // update current
-      for (let i = 0; i < this.creatures.length; i++) {
-        let [pp, prevColor] = history[i]!
-        pp = pp!
-        prevColor = prevColor!
-        const c = this.creatures[i]!
-        const p = c.position
-        console.log(`from ${pp.vec.toString()} to ${p.vec.toString()}`)
-
-        data.set(
-          pp.x - 2,
-          pp.y - 2,
-          CREATURE_SIZE + 2,
-          CREATURE_SIZE + 2,
-          prevColor,
-        )
-        data.fill(p.x, p.y, CREATURE_SIZE, CREATURE_SIZE, c.color)
-      }
-      // for (let i = 0; i < data.buffer.length; i++) {
-      //   if (data.buffer[i] !== 0) console.log(data.buffer[i])
-      // }
-
-      this.ctx.putImageData(data.data, 0, 0)
-      console.log('A')
-
-      document.getElementById('debug')!.innerHTML = `${Date.now() - start}ms`
-    }, TIMESTEP_MS)
-
-    // requestAnimationFrame(() => {
-    //   this.drawLoop()
-    // })
+    requestAnimationFrame(() => {
+      this.draw(prevData)
+    })
   }
 
   private update() {
@@ -141,42 +96,53 @@ export class Simulation {
     }
   }
 
-  private draw(buffer: Uint32Array) {
-    const tWidth = this.map.tWidth
-    const tHeight = this.map.tHeight
-    for (let j = 0; j < this.map.height; j++) {
-      for (let i = 0; i < this.map.width; i++) {
-        const c = this.map.data[j]![i]!
-        // start y
-        // const y = j * tHeight
-        // const x = i * tWidth
-        // const pixel = i * tWidth
-        // for (y; y < y + tHeight; y++) {
-        //   for (x; x < x + tWidth; x++) {
-        //     buffer
-        //   }
-        // }
-        this.ctx.fillStyle = c.rgb()
-        this.ctx.fillRect(
-          i * this.map.tWidth,
-          j * this.map.tHeight,
-          this.map.tWidth,
-          this.map.tHeight,
-        )
-      }
-    }
-    // draw creatures
-    for (const c of this.creatures) {
-      const [x, y] = c.position
-      this.ctx.fillStyle = c.color.rgb()
-      this.ctx.fillRect(x!, y!, CREATURE_SIZE, CREATURE_SIZE)
+  private draw(prevData: ImageBuffer) {
+    const start = Date.now()
+    // create new buffer
+    const data = new ImageBuffer(
+      this.ctx.createImageData(this.canvas.width, this.canvas.height),
+    )
 
-      const [i, j] = this.map.index(x, y)
-      const p = vec2(i!, j!)
-      for (const n of neighbors) {
-        p.clone().add(n)
+    // this.update()
+    // this.draw(buffer)
+    const history: Array<[Vector<2>, Uint8ClampedArray[]]> = []
+    for (const c of this.creatures) {
+      // update history
+      const pp = c.position
+      const prevColor = prevData.get(pp.x, pp.y, CREATURE_SIZE, CREATURE_SIZE)
+      history.push([pp.clone(), prevColor.slice(0)])
+
+      // update character
+      c.step()
+      const { x, y } = c.position
+      // bound x,y
+      if (x < 0) c.position.set(0, this.canvas.width - x)
+      if (x > this.canvas.width - 1) c.position.set(0, x % this.canvas.width)
+      if (y < 0) c.position.set(1, this.canvas.height - y)
+      if (y > this.canvas.height - 1) {
+        c.position.set(1, y % this.canvas.height)
       }
     }
+
+    // set prev to current state
+    prevData = data.clone()
+    // update current
+    for (let i = 0; i < this.creatures.length; i++) {
+      let [pp, prevColor] = history[i]!
+      pp = pp!
+      prevColor = prevColor!
+      const c = this.creatures[i]!
+      const p = c.position
+      data.set(pp.x, pp.y, CREATURE_SIZE, CREATURE_SIZE, prevColor)
+      data.fill(p.x, p.y, CREATURE_SIZE, CREATURE_SIZE, c.color)
+    }
+
+    this.ctx.putImageData(data.data, 0, 0)
+
+    document.getElementById('debug')!.innerHTML = `${Date.now() - start}ms`
+    requestAnimationFrame(() => {
+      this.draw(prevData)
+    })
   }
 
   addCreature(creature: Creature) {

@@ -57,13 +57,10 @@ export class ImageBuffer {
     let j = 0
     for (let o = y * width; o < (y + dy) * width; o += width) {
       for (let d = x * 4; d < (x + dx) * 4; d++) {
-        this.buffer[o + d] = value[i]![j]!
+        this.buffer[o + d] = value[j]![i]!
+        i++
       }
-      i++
-      if (i > value[0]!.length) {
-        i = 0
-        j++
-      }
+      j++
     }
   }
 

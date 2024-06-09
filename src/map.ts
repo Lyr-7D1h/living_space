@@ -13,7 +13,6 @@ export class Map {
   constructor(width: number, height: number) {
     const rowLength = Math.ceil(width / TILE_SIZE)
     const columnLength = Math.ceil(height / TILE_SIZE)
-    console.log(rowLength, columnLength)
     const row = Array.from(
       { length: rowLength },
       (_) => new Color(255, 255, 255),
