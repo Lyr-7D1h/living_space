@@ -46,30 +46,15 @@ export class Simulation {
         const color = new Color(r(), r(), r())
         debug(`new creature at ${x} ${y} with ${color.rgb()}`)
 
-        this.addCreature(
-          new Creature({
-            position: vec2(x, y),
-            size: 2,
-            color,
-          }),
-        )
+        this.addCreature(Creature.random({ position: vec2(x, y) }))
       },
       false,
     )
   }
 
   private drawLoop() {
-    for (let i = 0; i < 0; i++) {
-      const x = () => Math.floor(Math.random() * this.canvas.width)
-      const y = () => Math.floor(Math.random() * this.canvas.height)
-      const r = () => Math.floor(Math.random() * 250)
-      this.creatures.push(
-        new Creature({
-          position: vec2(x(), y()),
-          color: new Color(r(), r(), r()),
-          size: 2,
-        }),
-      )
+    for (let i = 0; i < 1000; i++) {
+      this.creatures.push(Creature.random())
     }
 
     const prevData = new ImageBuffer(
