@@ -1,5 +1,5 @@
-import { Color } from './color'
-import { Vector, vec2 } from './vec'
+import { type Color } from './color'
+import { type Vector, vec2 } from './vec'
 
 export interface CreatureArgs {
   position: Vector<2>
@@ -30,7 +30,7 @@ export class Creature {
     this.color = args.color
   }
 
-  /** take a step into a direction based on characteristics*/
+  /** take a step into a direction based on characteristics */
   step() {
     const m = neighbors[Math.floor(Math.random() * neighbors.length)]!
     this.position.add(m)

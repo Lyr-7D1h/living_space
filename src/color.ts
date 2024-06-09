@@ -48,4 +48,8 @@ export class Color {
   rgb() {
     return `rgb(${this.r}, ${this.g}, ${this.b})`
   }
+
+  u32() {
+    return (this.r << 16) | (this.g << 8) | this.b
+  }
 }

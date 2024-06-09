@@ -5,11 +5,14 @@ body {
   overflow: hidden;
 }
 canvas {
-  z-index: 99;
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
-  /* background: linear-gradient(#b7b0e3, #ffd3d6); */
+}
+#debug {
+  position: absolute;
+  color: black;
+  z-index: 999;
 }

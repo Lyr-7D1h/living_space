@@ -1,13 +1,14 @@
 import { Color } from './color'
 import { TILE_SIZE } from './constants'
 import { debug } from './log'
+import { type Vector, vec2 } from './vec'
 
 export class Map {
   data: Color[][]
   tWidth: number
   tHeight: number
-  private cWidth: number
-  private cHeight: number
+  private readonly cWidth: number
+  private readonly cHeight: number
 
   constructor(width: number, height: number) {
     const rowLength = Math.ceil(width / TILE_SIZE)
@@ -19,8 +20,8 @@ export class Map {
     )
     this.data = Array.from({ length: columnLength }, (_) => [...row])
     // const d = width - rowLength * TILE_SIZE
-    this.tWidth = TILE_SIZE //+ Math.floor(d / rowLength)
-    this.tHeight = TILE_SIZE //+ Math.floor(d / columnLength)
+    this.tWidth = TILE_SIZE // + Math.floor(d / rowLength)
+    this.tHeight = TILE_SIZE // + Math.floor(d / columnLength)
     this.cWidth = width
     this.cHeight = height
     debug(
@@ -66,23 +67,31 @@ export class Map {
     }
   }
 
-  index(x: number, y: number) {
-    if (x < 0 || x > this.cWidth - 1 || y < 0 || y > this.cHeight - 1)
+  index(p: Vector<2>) {
+    const { x, y } = p
+    if (x < 0 || x > this.cWidth - 1 || y < 0 || y > this.cHeight - 1) {
       throw Error(
         `Invalid xy coordinates ${x} ${y} are outside of ${this.cWidth} ${this.cHeight}`,
       )
-    return [Math.floor(x / this.tWidth), Math.floor(y / this.tHeight)]
+    }
+    return vec2(Math.floor(x / this.tWidth), Math.floor(y / this.tHeight))
   }
-  get(i: number, j: number): Color {
-    if (i < 0 || i > this.width - 1 || j < 0 || j > this.height - 1)
+
+  get(p: Vector<2>): Color {
+    const { x: i, y: j } = p
+    if (i < 0 || i > this.width - 1 || j < 0 || j > this.height - 1) {
       throw Error(
         `Invalid ij coordinates ${i} ${j} are outside of ${this.width} ${this.height}`,
       )
+    }
     return this.data[j]![i]!
   }
-  set(i: number, j: number, color: Color) {
-    this.data[j]![i]! = color
+
+  set(p: Vector<2>, color: Color) {
+    const { x: i, y: j } = p
+    this.data[j]![i] = color
   }
+
   /** returns [x,y,w,h] */
   getTileDimensions(i: number, j: number): number[] {
     return [i * this.tWidth, j * this.tHeight, this.tWidth, this.tHeight]
