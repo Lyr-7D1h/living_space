@@ -48,6 +48,6 @@ export class CDF {
   /** draw a random number from pmf */
   draw() {
     const r = Math.random()
-    return this.f.findIndex((p) => r < p)!
+    return this.f.findIndex((p) => r < p)
   }
 }

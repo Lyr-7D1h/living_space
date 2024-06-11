@@ -1,7 +1,7 @@
 // use p5 as ref https://p5js.org/reference/#/p5.Image
 
 import { type Color } from './color'
-import { Vector } from './vec'
+import { type Vector } from './vec'
 
 // https://github.dev/ronikaufman/poetical_computer_vision/blob/main/days01-10/day01/day01.pde
 export class ImageBuffer {
@@ -41,7 +41,7 @@ export class ImageBuffer {
     }
   }
 
-  gradient(
+  gradientRectangle(
     x: number,
     y: number,
     dx: number,
@@ -61,39 +61,89 @@ export class ImageBuffer {
     }
   }
 
+  /** https://en.wikipedia.org/wiki/Midpoint_circle_algorithm */
   gradientCircle(p: Vector<2>, r: number, c: Color, percentage: number) {
-    // FIXME
-    const { x, y } = p
-    const width = this.data.width * 4
-    const v = [c.r, c.g, c.b, 255]
-    const dy = r * 2 + 1
-    let j = p.y - r
-    for (let o = (y - r) * width; o <= (y + dy) * width; o += width) {
-      const dx = 2 * r * 4 + 1 - 2 * Math.abs(j - p.y)
-      for (let d = (x - dx) * 4; d <= (x + dx * 2 + 1) * 4; d++) {
-        const i = o + d
-        this.buffer[i] += 255
+    let x = r
+    let y = 0
+    let d = 1 - x
+    while (x >= y) {
+      this.gradientHorizontalLine(p.x - x, 2 * x, p.y + y, c, percentage)
+      if (y !== 0) {
+        this.gradientHorizontalLine(p.x - x, 2 * x, p.y - y, c, percentage)
       }
-      j++
+
+      y++
+      if (d > 0) {
+        if (x >= y) {
+          this.gradientHorizontalLine(
+            p.x - y + 1,
+            2 * y - 1,
+            p.y - x,
+            c,
+            percentage,
+          )
+          this.gradientHorizontalLine(
+            p.x - y + 1,
+            2 * y - 1,
+            p.y + x,
+            c,
+            percentage,
+          )
+        }
+        // go down
+        x--
+        d += 2 * (y - x + 1)
+      } else {
+        // go east
+        d += 2 * y + 1
+      }
     }
   }
 
+  gradientHorizontalLine(
+    x: number,
+    dx: number,
+    y: number,
+    c: Color,
+    percentage: number,
+  ) {
+    const o = y * this.width * 4
+    for (let i = x * 4 + o; i < (x + dx) * 4 + o; i++) {
+      const diff = c.c[i % 4]! - this.buffer[i]!
+      this.buffer[i] += Math.sign(diff) * Math.abs(diff) * percentage
+    }
+  }
+
+  set(x: number, y: number, value: Color): void
   set(
     x: number,
     y: number,
-    dx: number,
-    dy: number,
-    value: Uint8ClampedArray[],
-  ) {
-    const width = this.data.width * 4
-    let i = 0
-    let j = 0
-    for (let o = y * width; o <= (y + dy) * width; o += width) {
-      for (let d = x * 4; d <= (x + dx) * 4; d++) {
-        this.buffer[o + d] = value[j]![i]!
-        i++
+    dx: number | Color,
+    dy?: number,
+    value?: Uint8ClampedArray[],
+  ): void {
+    if (
+      typeof value !== 'undefined' &&
+      typeof dy !== 'undefined' &&
+      typeof dx === 'number'
+    ) {
+      const width = this.data.width * 4
+      let i = 0
+      let j = 0
+      for (let o = y * width; o <= (y + dy) * width; o += width) {
+        for (let d = x * 4; d <= (x + dx) * 4; d++) {
+          this.buffer[o + d] = value[j]![i]!
+          i++
+        }
+        j++
       }
-      j++
+      return
+    }
+
+    let i = x * 4 + y * this.width * 4
+    const j = i + 4
+    for (i; i < j; i++) {
+      this.buffer[i] = (dx as Color).c[i % 4]!
     }
   }
 

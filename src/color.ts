@@ -1,10 +1,23 @@
 export class Color {
-  private readonly c: number[]
+  c: number[] | Uint8ClampedArray
 
-  constructor(r: number, g: number, b: number)
-  constructor(...color: number[]) {
-    if (color.length !== 3) throw Error('Color has to have 3 elements')
-    this.c = color
+  constructor(r: number, g: number, b: number, a?: number)
+  constructor(color: number[] | Uint8ClampedArray)
+  constructor(
+    r: number | number[] | Uint8ClampedArray,
+    g?: number,
+    b?: number,
+    a?: number,
+  ) {
+    if (r instanceof Uint8ClampedArray || Array.isArray(r)) {
+      this.c = r
+      return
+    }
+    if (typeof g === 'undefined' || typeof b === 'undefined') {
+      throw Error('Color has to have 3 or 4 elements')
+    }
+    this.c = [r, g, b, 255]
+    if (typeof a !== 'undefined') this.c.push(a)
   }
 
   get r() {
@@ -29,6 +42,14 @@ export class Color {
 
   set b(v: number) {
     this.c[2] = v
+  }
+
+  get a() {
+    return this.c[3]!
+  }
+
+  set a(v: number) {
+    this.c[3] = v
   }
 
   clone(): Color {
@@ -63,6 +84,8 @@ export class Color {
     this.g += Math.sign(d) * Math.abs(d) * percentage
     d = color.b - this.b
     this.b += Math.sign(d) * Math.abs(d) * percentage
+    d = color.a - this.a
+    this.a += Math.sign(d) * Math.abs(d) * percentage
     return this.normalize()
   }
 

@@ -33,7 +33,8 @@ export class Simulation {
   start() {
     this.setup()
     // this.grid();
-    this.drawLoop()
+
+    this.draw()
   }
 
   private setup() {
@@ -52,16 +53,20 @@ export class Simulation {
     )
   }
 
-  private drawLoop() {
-    for (let i = 0; i < 1000; i++) {
-      this.creatures.push(Creature.random())
-    }
+  private draw() {
+    // for (let i = 0; i < 500; i++) {
+    //   this.creatures.push(Creature.random())
+    // }
 
     const map = new ImageBuffer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
     )
     // initialize canvas with white pixels, looks slightly better on borders
     map.fill(0, 0, map.width, map.height, new Color(255, 255, 255))
+    // map.gradientCircle(vec2(50, 50), 10, new Color(255, 0, 0), 0.1)
+    // map.gradientCircle(vec2(70, 50), 5, new Color(0, 0, 255), 0.1)
+    // map.gradientCircle(vec2(70, 50), 5, new Color(0, 0, 255), 0.1)
+    // map.gradientHorizontalLine(50, 10, 50, new Color(0, 0, 0), 0.8)
 
     // setInterval(() => {
     //   perf(() => {
@@ -70,13 +75,12 @@ export class Simulation {
     // }, TIMESTEP_MS)
     requestAnimationFrame(() => {
       perf(() => {
-        this.draw(map)
+        this.drawLoop(map)
       })
     })
   }
 
-  private draw(map: ImageBuffer) {
-    // map.gradientCircle(vec2(500, 500), 5, new Color(255, 0, 0), 0.4)
+  private drawLoop(map: ImageBuffer) {
     // this.ctx.putImageData(map.data, 0, 0)
     for (const c of this.creatures) {
       // update character
@@ -93,14 +97,15 @@ export class Simulation {
     for (let i = 0; i < this.creatures.length; i++) {
       const c = this.creatures[i]!
       const p = c.position
-      map.gradient(
-        p.x - 5,
-        p.y - 5,
-        CREATURE_SIZE + 10,
-        CREATURE_SIZE + 10,
-        c.color,
-        COLORING_PERCENT,
-      )
+      map.gradientCircle(p, 10, c.color, COLORING_PERCENT)
+      // map.gradientRectangle(
+      //   p.x - 5,
+      //   p.y - 5,
+      //   CREATURE_SIZE + 10,
+      //   CREATURE_SIZE + 10,
+      //   c.color,
+      //   COLORING_PERCENT,
+      // )
     }
     const cmap = map.clone()
 
@@ -113,7 +118,7 @@ export class Simulation {
 
     requestAnimationFrame(() => {
       perf(() => {
-        this.draw(map)
+        this.drawLoop(map)
       })
     })
   }
