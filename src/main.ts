@@ -1,7 +1,12 @@
+import { setupCreator } from './creator'
 import { Simulation } from './simulation'
 
-const simulation = new Simulation()
+export const simulation = new Simulation()
 simulation.start()
 
-// allow acccess through console
+setupCreator()
+
+// allow acccess through console useful for debugging
 window.simulation = simulation
+
+setupCreator()

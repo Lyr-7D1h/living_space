@@ -54,7 +54,7 @@ export class Simulation {
   }
 
   private draw() {
-    // for (let i = 0; i < 500; i++) {
+    // for (let i = 0; i < 1000; i++) {
     //   this.creatures.push(Creature.random())
     // }
 
@@ -63,16 +63,7 @@ export class Simulation {
     )
     // initialize canvas with white pixels, looks slightly better on borders
     map.fill(0, 0, map.width, map.height, new Color(255, 255, 255))
-    // map.gradientCircle(vec2(50, 50), 10, new Color(255, 0, 0), 0.1)
-    // map.gradientCircle(vec2(70, 50), 5, new Color(0, 0, 255), 0.1)
-    // map.gradientCircle(vec2(70, 50), 5, new Color(0, 0, 255), 0.1)
-    // map.gradientHorizontalLine(50, 10, 50, new Color(0, 0, 0), 0.8)
 
-    // setInterval(() => {
-    //   perf(() => {
-    //     this.draw(prevData)
-    //   })
-    // }, TIMESTEP_MS)
     requestAnimationFrame(() => {
       perf(() => {
         this.drawLoop(map)
@@ -83,13 +74,14 @@ export class Simulation {
   private drawLoop(map: ImageBuffer) {
     // this.ctx.putImageData(map.data, 0, 0)
     for (const c of this.creatures) {
+      // console.log(c.color.c, c.position.vec)
       // update character
       c.step()
       const { x, y } = c.position
       // bound x,y
-      if (x < 0) c.position.set(0, this.canvas.width - x)
+      if (x < 0) c.position.set(0, this.canvas.width + x)
       if (x > this.canvas.width - 1) c.position.set(0, x % this.canvas.width)
-      if (y < 0) c.position.set(1, this.canvas.height - y)
+      if (y < 0) c.position.set(1, this.canvas.height + y)
       if (y > this.canvas.height - 1) {
         c.position.set(1, y % this.canvas.height)
       }
@@ -124,6 +116,7 @@ export class Simulation {
   }
 
   addCreature(creature: Creature) {
+    debug(`Adding creature ${JSON.stringify(creature)}`)
     this.creatures.push(creature)
   }
 

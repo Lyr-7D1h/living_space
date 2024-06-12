@@ -1,8 +1,17 @@
 export class PMF {
   f: number[]
+
   constructor(...values: number[]) {
     const sum = values.reduce((partialSum, a) => partialSum + a, 0)
     this.f = values.map((v) => v / sum)
+    console.log(this.f)
+  }
+
+  set(index: number, value: number) {
+    this.f[index] = value
+    // renormalize
+    const sum = this.f.reduce((partialSum, a) => partialSum + a, 0)
+    this.f = this.f.map((v) => v / sum)
   }
 
   [Symbol.iterator]() {
@@ -11,11 +20,6 @@ export class PMF {
 
   cdf() {
     return CDF.fromPdf(this)
-  }
-
-  /** draw a random number from pmf */
-  draw() {
-    return CDF.fromPdf(this).draw()
   }
 }
 
@@ -38,7 +42,17 @@ export class CDF {
 
   /** create cdf from numbers going up from 0 to 1 */
   constructor(...values: number[]) {
-    this.f = values
+    const sum = values.reduce((partialSum, a) => partialSum + a, 0)
+    let f = values.map((v) => v / sum)
+    console.log(f)
+    let a = 0
+    f = f.map((p) => {
+      a += p
+      return a
+    })
+    // account for floating point errors
+    f[f.length - 1] = 1
+    this.f = f
   }
 
   [Symbol.iterator]() {

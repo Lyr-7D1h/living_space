@@ -1,6 +1,19 @@
 export class Color {
   c: number[] | Uint8ClampedArray
 
+  static fromHex(hex: string) {
+    const v = hex
+      .replace(
+        /^#?([a-f\d])([a-f\d])([a-f\d])$/i,
+        (m, r, g, b) => '#' + r + r + g + g + b + b,
+      )
+      .substring(1)
+      .match(/.{2}/g)!
+      .map((x) => parseInt(x, 16))
+
+    return new Color(v)
+  }
+
   constructor(r: number, g: number, b: number, a?: number)
   constructor(color: number[] | Uint8ClampedArray)
   constructor(
@@ -10,8 +23,15 @@ export class Color {
     a?: number,
   ) {
     if (r instanceof Uint8ClampedArray || Array.isArray(r)) {
-      this.c = r
-      return
+      if (r.length === 3) {
+        this.c = [...r, 255]
+        return
+      }
+      if (r.length === 4) {
+        this.c = r
+        return
+      }
+      throw Error(`invalid length ${r.length} for color given`)
     }
     if (typeof g === 'undefined' || typeof b === 'undefined') {
       throw Error('Color has to have 3 or 4 elements')

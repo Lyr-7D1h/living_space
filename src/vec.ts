@@ -35,6 +35,20 @@ export class Vector<N extends number> {
     return this
   }
 
+  mul(s: number) {
+    for (let i = 0; i < this.vec.length; i++) {
+      this.vec[i] *= s
+    }
+    return this
+  }
+
+  floor() {
+    for (let i = 0; i < this.vec.length; i++) {
+      this.vec[i] = Math.floor(this.vec[i]!)
+    }
+    return this
+  }
+
   scale(s: number) {
     for (let i = 0; i < this.vec.length; i++) {
       this.vec[i] *= s
