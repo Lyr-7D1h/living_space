@@ -24,10 +24,15 @@ export async function connect(addr: string): Promise<Connection> {
   })
 }
 
-export type Message =
+export type Command =
   | {
       type: 'init'
       connection_type: 'canvas' | 'controller'
+    }
+    | {
+      type: 'config'
+      width: number
+      height: number
     }
   | (CreatureArgs & { type: 'create' })
 
@@ -59,7 +64,7 @@ export class Connection {
     }
   }
 
-  send(cmd: Message) {
+  send(cmd: Command) {
     this.socket.send(JSON.stringify(cmd))
   }
 

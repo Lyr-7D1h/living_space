@@ -35,6 +35,8 @@ export function setupCreator(
     }
   }
 
+  document.getElementById('submit')!.removeAttribute('disabled')
+
   const form = document.getElementById(
     'creature_creator_form',
   )! as HTMLFormElement
@@ -65,6 +67,8 @@ export function setupCreator(
       },
     })
   }
+
+  console.log('creator setup')
 }
 
 const URL = 'ws://localhost:8523'

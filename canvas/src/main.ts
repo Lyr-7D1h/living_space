@@ -1,4 +1,4 @@
-import { type Message, connect } from './connection'
+import { type Command, connect } from './connection'
 import { setupCreator } from './creator'
 import { Creature } from './creature'
 import { Simulation } from './simulation'
@@ -26,8 +26,17 @@ await (async () => {
       type: 'init',
       connection_type: 'canvas',
     })
+    connection.send({
+      type: 'init',
+      connection_type: 'canvas',
+    })
+    connection.send({
+      type: 'config',
+      width: simulation.width,
+      height: simulation.height
+    })
     connection.on('message', (d) => {
-      const msg = d as Message
+      const msg = d as Command
       switch (msg.type) {
         case 'create': {
           const creature = new Creature(msg)
