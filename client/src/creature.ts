@@ -2,14 +2,27 @@ import { Color } from './color'
 import { CDF } from './random'
 import { type Vector, vec2 } from './vec'
 
-export interface CreatureArgs {
-  position: Vector<2>
-  size: number
-  color: Color
-  coloringPercentage: number
-  preference: CDF
-  speed: number
+export interface Characteristics {
+  curiosity: number
+  dominance: number
+  friendliness: number
 }
+
+export type CreatureArgs =
+  | {
+      position: Vector<2>
+      size: number
+      color: Color
+      coloringPercentage: number
+      preference: CDF
+      speed: number
+    }
+  | {
+      position: Vector<2>
+      size: number
+      color: Color
+      characteristics: Characteristics
+    }
 
 export const neighbors = [
   vec2(-1, -1),
@@ -53,9 +66,15 @@ export class Creature {
     this.position = args.position
     this.size = args.size
     this.color = args.color
-    this.speed = args.speed
     this.prev = 4
-    this.preference = args.preference
+    if ('speed' in args) {
+      this.speed = args.speed
+      this.preference = args.preference
+    } else {
+      // TODO: add from chars
+      this.speed = 0
+      this.preference = new CDF()
+    }
   }
 
   /** take a step into a direction based on characteristics */
