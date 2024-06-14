@@ -1,6 +1,5 @@
-use std::{sync::Arc, thread::sleep, time::Duration};
+use std::time::Duration;
 
-use crossbeam::epoch::Atomic;
 use futures_util::{FutureExt, TryStreamExt};
 use log::{debug, error, info};
 
@@ -9,10 +8,7 @@ use anyhow::{anyhow, Context, Result};
 use serde::Deserialize;
 use tokio::{
     net::{TcpListener, TcpStream, ToSocketAddrs},
-    sync::{
-        mpsc::{channel, Sender},
-        Mutex,
-    },
+    time::sleep,
 };
 use tokio_tungstenite::tungstenite::Message;
 
@@ -58,14 +54,16 @@ impl SimulationServer {
     pub async fn listen(self) -> Result<()> {
         info!("Listening on: {:?}", self.listener.local_addr()?);
 
-        // only accept a single session
+        let mut handles = vec![];
         while let Ok((mut stream, _)) = self.listener.accept().await {
-            tokio::spawn(async move {
+            let handle = tokio::spawn(async move {
                 if let Err(e) = session(&mut stream).await {
-                    error!("Closing session to {:?}", stream.local_addr());
+                    error!("Closing session to {:?}", stream.peer_addr());
                     error!("{e}")
                 }
             });
+            println!("a");
+            handles.push(handle)
         }
 
         Ok(())
@@ -122,6 +120,6 @@ async fn session(stream: &mut TcpStream) -> Result<()> {
                 }
             }
         };
-        sleep(Duration::from_millis(16));
+        sleep(Duration::from_millis(16)).await;
     }
 }

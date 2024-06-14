@@ -1,0 +1,76 @@
+@font-face {
+  font-family: 'Ubuntu Mono';
+  font-style: normal;
+  font-weight: 20;
+  font-display: block;
+  src: url('./lib/UbuntuMono-Regular.ttf') format('truetype');
+}
+body {
+  padding: 0;
+  margin: 0;
+  width: 100vw;
+  min-height: 100vh;
+  font-family: 'Ubuntu Mono';
+  background-color: #000000c4;
+}
+#messages {
+  z-index: 1000;
+  position: absolute;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  justify-content: center;
+}
+.message {
+  font-size: 1.2em;
+  border: solid;
+  border-width: 1px;
+  padding: 5px;
+  margin: auto;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+.message-error {
+  background-color: rgba(255, 0, 0, 0.5);
+  border-color: darkred;
+}
+.message-warn {
+  background-color: rgba(255, 255, 0, 0.5);
+  border-color: darkorange;
+}
+.message-info {
+  background-color: rgba(0, 0, 255, 0.5);
+  border-color: darkblue;
+}
+
+#creature_creator {
+  z-index: 999;
+  /* width: 100%; */
+  text-align: center;
+  color: white;
+}
+#position {
+  background-color: #555555;
+}
+label {
+  display: block;
+  width: 100%;
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+input {
+  width: 80%;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+input[type='submit'] {
+  background-color: #0073d1;
+  border: none;
+  padding: 20px;
+  color: white;
+}
+input[type='submit']:hover {
+  background-color: #222;
+  cursor: pointer;
+}

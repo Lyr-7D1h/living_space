@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Living Space</title>
+    <link rel="stylesheet" href="./main.css" />
+  </head>
+  <body>
+    <div id="messages"></div>
+    <div id="creature_creator">
+      <form id="creature_creator_form">
+        <div
+          style="
+            width: 50%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            margin: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          "
+        >
+          <div style="width: 100%">
+            <label for="position">Position</label>
+            <canvas id="position"> </canvas>
+          </div>
+        </div>
+        <div
+          style="
+            width: 50%;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            margin: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          "
+        >
+          <div style="width: 100%">
+            <label for="color">Color</label>
+            <input id="color" name="color" type="color" value="#29A4DA" />
+            <label for="curiosity">Curiosity</label>
+            <input name="curiosity" type="range" min="1" max="100" value="50" />
+            <label for="dominance">Dominance</label>
+            <input name="dominance" type="range" min="1" max="100" value="50" />
+            <label for="friendliness">Friendliness</label>
+            <input
+              name="friendliness"
+              type="range"
+              min="1"
+              max="100"
+              value="50"
+            />
+            <input type="submit" value="Create" />
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

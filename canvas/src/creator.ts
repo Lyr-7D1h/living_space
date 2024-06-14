@@ -1,6 +1,5 @@
 import { Color } from './color'
 import { Creature } from './creature'
-import { simulation } from './main'
 import { CDF } from './random'
 import { vec2 } from './vec'
 
