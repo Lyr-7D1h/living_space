@@ -1,16 +1,8 @@
-@font-face {
-  font-family: 'Ubuntu Mono';
-  font-style: normal;
-  font-weight: 20;
-  font-display: block;
-  src: url('./lib/UbuntuMono-Regular.ttf') format('truetype');
-}
 body {
   width: 100vw;
   min-height: 100vh;
   margin: 0;
   overflow: hidden;
-  font-family: 'Ubuntu Mono';
 }
 #root {
   position: absolute;
@@ -53,36 +45,4 @@ body {
 .message-info {
   background-color: rgba(0, 0, 255, 0.5);
   border-color: darkblue;
-}
-
-#creature_creator {
-  position: absolute;
-  z-index: 999;
-  right: 0;
-  background-color: #000000c4;
-  color: white;
-  padding: 30px;
-}
-#position {
-  background-color: #555555;
-}
-label {
-  margin: 10px;
-  width: 100%;
-  display: block;
-}
-input {
-  display: block;
-  width: 100%;
-  margin: 10px;
-}
-input[type='submit'] {
-  background-color: #555;
-  border: none;
-  padding: 10px;
-  color: white;
-}
-input[type='submit']:hover {
-  background-color: #222;
-  cursor: pointer;
 }

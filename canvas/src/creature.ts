@@ -72,8 +72,10 @@ export class Creature {
       this.preference = args.preference
     } else {
       // TODO: add from chars
-      this.speed = 0
-      this.preference = new CDF()
+      this.speed = 2
+      this.preference = new CDF(
+        ...Array.from({ length: 9 }, (_) => Math.floor(Math.random() * 50)),
+      )
     }
   }
 

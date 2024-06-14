@@ -136,8 +136,21 @@ async fn session<'n>(
         };
 
         if let Ok(cmd) = rx.try_recv() {
-            let value = serde_json::to_string(&cmd).context("failed to parse joint values")?;
-            stream.send(Message::Text(value)).await?;
+            match cmd {
+                Command::Config { .. } => {
+                    if let ConnectionType::Controller = connection_type {
+                        let value = serde_json::to_string(&cmd).context("failed to send cmd")?;
+                        stream.send(Message::Text(value)).await?;
+                    }
+                }
+                Command::Create { .. } => {
+                    if let ConnectionType::Canvas = connection_type {
+                        let value = serde_json::to_string(&cmd).context("failed to send cmd")?;
+                        stream.send(Message::Text(value)).await?;
+                    }
+                }
+                _ => {}
+            }
         }
 
         sleep(Duration::from_millis(16)).await;

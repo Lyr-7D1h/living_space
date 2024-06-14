@@ -1,16 +1,15 @@
+import { Color } from './color'
 import { type Command, connect } from './connection'
-import { setupCreator } from './creator'
 import { Creature } from './creature'
 import { Simulation } from './simulation'
 import { error, info } from './util'
+import { vec2 } from './vec'
 
 const URL = 'ws://localhost:8523'
 
 await (async () => {
   const simulation = new Simulation()
   simulation.start()
-
-  setupCreator()
 
   // allow acccess through console useful for debugging
   window.simulation = simulation
@@ -27,19 +26,20 @@ await (async () => {
       connection_type: 'canvas',
     })
     connection.send({
-      type: 'init',
-      connection_type: 'canvas',
-    })
-    connection.send({
       type: 'config',
       width: simulation.width,
-      height: simulation.height
+      height: simulation.height,
     })
     connection.on('message', (d) => {
-      const msg = d as Command
-      switch (msg.type) {
+      const cmd = d as Command
+      switch (cmd.type) {
         case 'create': {
-          const creature = new Creature(msg)
+          const creature = new Creature({
+            position: vec2(...cmd.position),
+            size: cmd.size,
+            color: new Color(cmd.color),
+            characteristics: cmd.characteristics,
+          })
           simulation.addCreature(creature)
           break
         }

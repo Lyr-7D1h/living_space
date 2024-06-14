@@ -16,7 +16,7 @@ export async function connect(addr: string): Promise<Connection> {
 
     setTimeout(() => {
       if (!returned) {
-        reject(new Error('connection timed out'))
+        return reject(new Error('connection timed out'))
       }
     }, 8000)
   })

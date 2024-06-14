@@ -1,4 +1,4 @@
-import { type CreatureArgs } from './creature'
+import { Characteristics, type CreatureArgs } from './creature'
 
 /** Connect to socket in a blocking manner erroring in case of timeout or error */
 export async function connect(addr: string): Promise<Connection> {
@@ -29,12 +29,18 @@ export type Command =
       type: 'init'
       connection_type: 'canvas' | 'controller'
     }
-    | {
+  | {
       type: 'config'
       width: number
       height: number
     }
-  | (CreatureArgs & { type: 'create' })
+  | {
+      type: 'create'
+      position: [number, number]
+      size: number
+      color: [number, number, number]
+      characteristics: Characteristics
+    }
 
 export class Connection {
   private readonly socket: WebSocket
