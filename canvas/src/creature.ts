@@ -44,7 +44,6 @@ export class Creature {
   coloringPercentage: number
   speed: number
   preference: CDF
-  private prev: number
 
   static random(args?: Partial<CreatureArgs>) {
     const x = () => Math.floor(Math.random() * window.innerWidth)
@@ -68,7 +67,6 @@ export class Creature {
     this.position = args.position
     this.size = args.size
     this.color = args.color
-    this.prev = 4
     if ('speed' in args) {
       this.speed = args.speed
       this.preference = args.preference
@@ -96,6 +94,5 @@ export class Creature {
     const i = this.preference.draw()
     const m = neighbors[i]!
     this.position.add(m.clone().scale(this.speed))
-    this.prev = i
   }
 }

@@ -1,5 +1,5 @@
 import { Color } from './color'
-import { COLORING_PERCENT, CREATURE_SIZE, DEBUG } from './constants'
+import { DEBUG } from './constants'
 import { Creature } from './creature'
 import { debug } from './log'
 import { vec2 } from './vec'
@@ -123,7 +123,7 @@ export class Simulation {
     for (let i = 0; i < this.creatures.length; i++) {
       const c = this.creatures[i]!
       const p = c.position
-      cmap.fill(p.x, p.y, CREATURE_SIZE, CREATURE_SIZE, c.color)
+      cmap.fill(p.x, p.y, c.size, c.size, c.color)
     }
     this.ctx.putImageData(cmap.data, 0, 0)
 
