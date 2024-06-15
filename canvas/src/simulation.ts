@@ -4,13 +4,18 @@ import { Creature } from './creature'
 import { debug } from './log'
 import { vec2 } from './vec'
 import { ImageBuffer } from './data'
+import { Debug } from './debug'
+
+const debugEl = new Debug()
 
 function perf(cb: () => void) {
   const start = Date.now()
   cb()
   const d = Date.now() - start
-  document.getElementById('debug')!.innerHTML =
-    `${d}ms<br />${Math.round(1000 / d)}fps`
+  if (DEBUG) {
+    debugEl.set('fps', `${Math.round(1000 / d)}`)
+    debugEl.set('delay', `${d}ms`)
+  }
 }
 
 /** responsible for building and rendering the entire simulated world */
@@ -84,6 +89,9 @@ export class Simulation {
   }
 
   private drawLoop(map: ImageBuffer) {
+    if (DEBUG) {
+      debugEl.set('pixels', this.creatures.length)
+    }
     // this.ctx.putImageData(map.data, 0, 0)
     for (const c of this.creatures) {
       // update character

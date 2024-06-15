@@ -71,6 +71,8 @@ export class Creature {
       this.speed = args.speed
       this.preference = args.preference
     } else {
+      // const c = args.characteristics
+      // const sum = c.curiosity + c.dominance + c.friendliness
       // TODO: add from chars
       this.speed = 2
       this.preference = new CDF(
