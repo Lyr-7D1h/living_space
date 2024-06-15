@@ -2,7 +2,7 @@ import { Color } from './color'
 import { type Command, connect } from './connection'
 import { Creature } from './creature'
 import { Simulation } from './simulation'
-import { error, info } from './util'
+import { error } from './util'
 import { vec2 } from './vec'
 
 let URL = 'ws://localhost:7543'
@@ -11,19 +11,28 @@ if (host !== null) {
   URL = `ws://${host}:7543`
 }
 
-await (async () => {
-  const simulation = new Simulation()
-  simulation.start()
+const simulation = new Simulation()
+simulation.start()
 
-  // allow acccess through console useful for debugging
-  window.simulation = simulation
+// allow acccess through console useful for debugging
+window.simulation = simulation
 
-  const infoBlock = info(`Connecting to ${URL}`, true)
-  const connection = await connect(URL).catch((e) => {
+async function sync() {
+  let connection = await connect(URL).catch((e) => {
     error(e)
-    // error(`failed to connect to ${URL} runnning in local mode`)
   })
-  infoBlock.remove()
+
+  while (typeof connection === 'undefined') {
+    connection = await connect(URL).catch((e) => {
+      error(e)
+    })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  connection.on('close', async () => {
+    await sync()
+  })
+
   if (typeof connection !== 'undefined') {
     connection.send({
       type: 'init',
@@ -50,7 +59,8 @@ await (async () => {
       }
     })
   }
-})()
+}
+sync().catch(error)
 
 declare global {
   interface Window {

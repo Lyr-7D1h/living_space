@@ -6,17 +6,19 @@ export async function connect(addr: string): Promise<Connection> {
     let returned = false
     connection.on('error', () => {
       returned = true
-      return reject(new Error(`connection to ${addr} failed`))
+      connection.close()
+      reject(new Error(`connection to ${addr} failed`))
     })
 
     connection.on('open', () => {
       returned = true
-      return resolve(connection)
+      resolve(connection)
     })
 
     setTimeout(() => {
       if (!returned) {
-        return reject(new Error('connection timed out'))
+        connection.close()
+        reject(new Error('connection timed out'))
       }
     }, 8000)
   })
@@ -38,7 +40,7 @@ export interface Characteristics {
   dominance: number
   friendliness: number
 }
-export type CreatureArgs = {
+export interface CreatureArgs {
   position: number[]
   size: number
   color: number[]
@@ -57,8 +59,11 @@ export class Connection {
   }
 
   on(type: 'message', cb: (data: Message) => void): void
-  on(type: 'open' | 'error', cb: (data: Event) => void): void
-  on(type: 'message' | 'open' | 'error', cb: (event: any) => void): void {
+  on(type: 'open' | 'error' | 'close', cb: (data: Event) => void): void
+  on(
+    type: 'message' | 'open' | 'error' | 'close',
+    cb: (event: any) => void,
+  ): void {
     switch (type) {
       case 'message':
         this.socket.addEventListener('message', (e) => {
@@ -67,6 +72,7 @@ export class Connection {
         break
       case 'open':
       case 'error':
+      case 'close':
         this.socket.addEventListener(type, (e) => {
           cb(e)
         })
@@ -75,6 +81,10 @@ export class Connection {
 
   send(cmd: Message) {
     this.socket.send(JSON.stringify(cmd))
+  }
+
+  close() {
+    this.socket.close()
   }
 
   connected() {

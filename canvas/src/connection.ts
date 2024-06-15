@@ -1,4 +1,4 @@
-import { Characteristics, type CreatureArgs } from './creature'
+import { type Characteristics } from './creature'
 
 /** Connect to socket in a blocking manner erroring in case of timeout or error */
 export async function connect(addr: string): Promise<Connection> {
@@ -8,6 +8,7 @@ export async function connect(addr: string): Promise<Connection> {
     let returned = false
     connection.on('error', () => {
       returned = true
+      connection.close()
       reject(new Error(`connection to ${addr} failed`))
     })
 
@@ -18,6 +19,7 @@ export async function connect(addr: string): Promise<Connection> {
 
     setTimeout(() => {
       if (!returned) {
+        connection.close()
         reject(new Error('connection timed out'))
       }
     }, 8000)
@@ -54,8 +56,11 @@ export class Connection {
   }
 
   on(type: 'message', cb: (data: unknown) => void): void
-  on(type: 'open' | 'error', cb: (data: Event) => void): void
-  on(type: 'message' | 'open' | 'error', cb: (event: Event) => void): void {
+  on(type: 'open' | 'error' | 'close', cb: (data: Event) => void): void
+  on(
+    type: 'message' | 'open' | 'error' | 'close',
+    cb: (event: Event) => void,
+  ): void {
     switch (type) {
       case 'message':
         this.socket.addEventListener('message', (e) => {
@@ -64,6 +69,7 @@ export class Connection {
         break
       case 'open':
       case 'error':
+      case 'close':
         this.socket.addEventListener(type, (e) => {
           cb(e)
         })
@@ -74,8 +80,8 @@ export class Connection {
     this.socket.send(JSON.stringify(cmd))
   }
 
-  init() {
-    this.socket.send(JSON.stringify({}))
+  close() {
+    this.socket.close()
   }
 
   connected() {

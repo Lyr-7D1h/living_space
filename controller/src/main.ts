@@ -81,16 +81,19 @@ export function setupCreator(
   console.log('creator setup')
 }
 
-async function main() {
-  const infoBlock = info(`Connecting to ${URL}`, true)
-  const connection = await connect(URL).catch((e) => {
+async function sync() {
+  let connection = await connect(URL).catch((e) => {
     error(e)
-    return undefined
   })
-  infoBlock.remove()
-  if (typeof connection === 'undefined') {
-    throw Error('failed to connect')
+  while (typeof connection === 'undefined') {
+    connection = await connect(URL).catch((e) => {
+      error(e)
+    })
   }
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  connection.on('close', async () => {
+    await sync()
+  })
   connection.send({
     type: 'init',
     connection_type: 'controller',
@@ -105,4 +108,4 @@ async function main() {
   })
 }
 
-main().catch(error)
+sync().catch(error)
