@@ -45,10 +45,6 @@ export function error(msg: any, permanent?: boolean): HTMLElement {
   return message('error', msg as string, permanent === true ? undefined : 8)
 }
 
-export function toNumber(n: string): number | null {
-  const num = Number(n)
-  if (typeof num === 'number') {
-    return num
-  }
-  return null
+export function roundTwoDec(n: number) {
+  return Math.round((n + Number.EPSILON) * 100) / 100
 }

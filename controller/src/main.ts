@@ -24,7 +24,7 @@ export function setupCreator(
   posCanvas.height = 500 * (canvasHeight / canvasWidth)
   const ctx = posCanvas.getContext('2d')!
   let position: [number, number] = [posCanvas.width / 2, posCanvas.height / 2]
-  ctx.fillStyle = '#29A4DA'
+  ctx.fillStyle = colorPicker.color.hexString
   ctx.beginPath()
   ctx.arc(position[0], position[1], 5, 0, 2 * Math.PI)
   ctx.fill()

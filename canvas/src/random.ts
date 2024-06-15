@@ -1,3 +1,5 @@
+import { roundTwoDec } from './util'
+
 export class PMF {
   f: number[]
 
@@ -44,11 +46,11 @@ export class CDF {
   constructor(...values: number[]) {
     const sum = values.reduce((partialSum, a) => partialSum + a, 0)
     let f = values.map((v) => v / sum)
-    console.log(f)
     let a = 0
     f = f.map((p) => {
       a += p
-      return a
+      if (a > 1) a = 1
+      return roundTwoDec(a)
     })
     // account for floating point errors
     f[f.length - 1] = 1

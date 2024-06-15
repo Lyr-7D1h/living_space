@@ -1,5 +1,6 @@
 import { Color } from './color'
 import { CDF } from './random'
+import { roundTwoDec } from './util'
 import { type Vector, vec2 } from './vec'
 
 export interface Characteristics {
@@ -40,6 +41,7 @@ export class Creature {
   position: Vector<2>
   size: number
   color: Color
+  coloringPercentage: number
   speed: number
   preference: CDF
   private prev: number
@@ -70,11 +72,17 @@ export class Creature {
     if ('speed' in args) {
       this.speed = args.speed
       this.preference = args.preference
+      this.coloringPercentage = args.coloringPercentage
     } else {
-      // const c = args.characteristics
-      // const sum = c.curiosity + c.dominance + c.friendliness
-      // TODO: add from chars
-      this.speed = 2
+      const c = args.characteristics
+      // get all chars as a percentage of total
+      const sum = c.curiosity + c.dominance + c.friendliness
+      const curiosity = c.curiosity / sum
+      const dominance = c.dominance / sum
+      const friendliness = c.friendliness / sum
+
+      this.speed = 1 + Math.round(4 * curiosity)
+      this.coloringPercentage = 0.015 + 0.1 * roundTwoDec(dominance)
       this.preference = new CDF(
         ...Array.from({ length: 9 }, (_) => Math.floor(Math.random() * 50)),
       )

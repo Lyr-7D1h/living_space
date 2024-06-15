@@ -108,7 +108,7 @@ export class Simulation {
     for (let i = 0; i < this.creatures.length; i++) {
       const c = this.creatures[i]!
       const p = c.position
-      map.gradientCircle(p, 10, c.color, COLORING_PERCENT)
+      map.gradientCircle(p, 10, c.color, c.coloringPercentage)
       // map.gradientRectangle(
       //   p.x - 5,
       //   p.y - 5,
