@@ -45,7 +45,8 @@ export function setupCreator(
     ctx.fill()
   })
 
-  document.getElementById('submit')!.removeAttribute('disabled')
+  const submit = document.getElementById('submit')!
+  submit.removeAttribute('disabled')
 
   const form = document.getElementById(
     'creature_creator_form',
@@ -76,6 +77,10 @@ export function setupCreator(
         friendliness: parseInt(data.get('friendliness')! as string),
       },
     })
+    submit.setAttribute('disabled', '')
+    setTimeout(() => {
+      submit.removeAttribute('disabled')
+    }, 2000)
   }
 
   console.log('creator setup')

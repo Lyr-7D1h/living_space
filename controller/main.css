@@ -70,9 +70,17 @@ input[type='submit'] {
   padding: 20px;
   color: white;
 }
+input:disabled input[type='submit']:hover {
+  background-color: #0068bd;
+}
 input[type='submit']:hover {
   background-color: #0068bd;
   cursor: pointer;
+}
+input:disabled,
+input:disabled input[type='submit']:hover {
+  background-color: #4b4b4b !important;
+  cursor: default !important;
 }
 .IroWheel,
 .IroSlider {
