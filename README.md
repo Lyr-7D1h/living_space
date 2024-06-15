@@ -23,8 +23,11 @@ Make creatures with different characteristics that will interact with each other
 For setting up a kiosk device with a pi I followed https://reelyactive.github.io/diy/pi-kiosk/
 
 ```bash
+supo apt-get update
+supo apt-get upgrade
 sudo apt-get install --no-install-recommends xserver-xorg xinit x11-xserver-utils
-sudo apt-get install chromium-browser matchbox-window-manager xautomation unclutter fonts-noto-color-emoji git cargo npm
+sudo apt-get install chromium-browser matchbox-window-manager xautomation unclutter fonts-noto-color-emoji git npm
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 echo "xinit /home/pi/kiosk -- vt$(fgconsole)" >> ~/.bashrc
 ```
@@ -36,6 +39,7 @@ System Options > S5 Boot / Auto Login > [B2 Console Autologin]
 sudo raspi-config
 ```
 
+Create `~/kiosk`
 
 ```bash
 #!/usr/bin/env bash
