@@ -1,5 +1,11 @@
+import iro from '@jaames/iro'
 import { type Connection, connect } from './connection'
 import { error, info } from './util'
+
+const colorPicker = new iro.ColorPicker('#color', {
+  width: 300,
+  color: '#29A4DA',
+})
 
 let URL = 'ws://localhost:7543'
 const host = new URLSearchParams(window.location.search).get('host')
@@ -30,16 +36,14 @@ export function setupCreator(
     ctx.fill()
   }
 
-  const color = document.getElementById('color')! as HTMLInputElement
-  color.onchange = function (_) {
-    if ('value' in this && typeof this.value !== 'undefined') {
-      ctx.fillStyle = this.value as string
-      ctx.clearRect(0, 0, posCanvas.width, posCanvas.height)
-      ctx.beginPath()
-      ctx.arc(position[0], position[1], 5, 0, 2 * Math.PI)
-      ctx.fill()
-    }
-  }
+  // const color = document.getElementById('color')! as HTMLInputElement
+  colorPicker.on('color:change', function (color: any) {
+    ctx.fillStyle = color.hexString
+    ctx.clearRect(0, 0, posCanvas.width, posCanvas.height)
+    ctx.beginPath()
+    ctx.arc(position[0], position[1], 5, 0, 2 * Math.PI)
+    ctx.fill()
+  })
 
   document.getElementById('submit')!.removeAttribute('disabled')
 
@@ -52,14 +56,14 @@ export function setupCreator(
 
     const scale = (x: number) => Math.floor(x * (canvasWidth / 500))
 
-    const color = (data.get('color')! as string)
+    const color = colorPicker.color.hexString
       .replace(
         /^#?([a-f\d])([a-f\d])([a-f\d])$/i,
         (_, r, g, b) => '#' + r + r + g + g + b + b,
       )
       .substring(1)
       .match(/.{2}/g)!
-      .map((x) => parseInt(x, 16))
+      .map((x: string) => parseInt(x, 16))
 
     connection.send({
       type: 'create',

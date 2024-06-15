@@ -65,12 +65,17 @@ input {
   margin-top: 10px;
 }
 input[type='submit'] {
-  background-color: #0073d1;
+  background-color: #0083ee;
   border: none;
   padding: 20px;
   color: white;
 }
 input[type='submit']:hover {
-  background-color: #222;
+  background-color: #0068bd;
   cursor: pointer;
+}
+.IroWheel,
+.IroSlider {
+  margin-left: auto;
+  margin-right: auto;
 }
