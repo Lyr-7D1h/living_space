@@ -5,7 +5,11 @@ import { Simulation } from './simulation'
 import { error, info } from './util'
 import { vec2 } from './vec'
 
-const URL = 'ws://localhost:8523'
+let URL = 'ws://localhost:7543'
+const host = new URLSearchParams(window.location.search).get('host')
+if (host !== null) {
+  URL = `ws://${host}:7543`
+}
 
 await (async () => {
   const simulation = new Simulation()

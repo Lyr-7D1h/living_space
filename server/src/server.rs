@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use futures_util::{stream::IntoStream, FutureExt, SinkExt, TryStreamExt};
-use log::{debug, error, info};
+use log::{error, info};
 
 use anyhow::{anyhow, Context, Result};
 
@@ -118,7 +118,7 @@ async fn init(stream: &mut TcpStream) -> Result<(WSStream, ConnectionType)> {
 async fn session<'n>(
     mut stream: WSStream<'n>,
     connection_type: ConnectionType,
-    mut tx: Sender<Command>,
+    tx: Sender<Command>,
     mut rx: Receiver<Command>,
 ) -> Result<()> {
     loop {

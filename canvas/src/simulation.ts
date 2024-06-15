@@ -29,10 +29,11 @@ export class Simulation {
 
     this.creatures = []
   }
-  
+
   get width() {
     return this.canvas.width
   }
+
   get height() {
     return this.canvas.height
   }

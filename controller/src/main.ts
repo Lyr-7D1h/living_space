@@ -1,5 +1,11 @@
-import { Connection, connect } from './connection'
+import { type Connection, connect } from './connection'
 import { error, info } from './util'
+
+let URL = 'ws://localhost:7543'
+const host = new URLSearchParams(window.location.search).get('host')
+if (host !== null) {
+  URL = `ws://${host}:7543`
+}
 
 export function setupCreator(
   connection: Connection,
@@ -9,7 +15,7 @@ export function setupCreator(
   // setup position canvas to get starting position
   const posCanvas = document.getElementById('position')! as HTMLCanvasElement
   posCanvas.width = 500
-  posCanvas.height = 500 * (canvasWidth / canvasHeight)
+  posCanvas.height = 500 * (canvasHeight / canvasWidth)
   const ctx = posCanvas.getContext('2d')!
   let position: [number, number] = [posCanvas.width / 2, posCanvas.height / 2]
   ctx.fillStyle = '#29A4DA'
@@ -44,7 +50,7 @@ export function setupCreator(
     e.preventDefault()
     const data = new FormData(form)
 
-    const scale = (x: number) => Math.floor(x * (canvasWidth / canvasHeight))
+    const scale = (x: number) => Math.floor(x * (canvasWidth / 500))
 
     const color = (data.get('color')! as string)
       .replace(
@@ -71,7 +77,6 @@ export function setupCreator(
   console.log('creator setup')
 }
 
-const URL = 'ws://localhost:8523'
 async function main() {
   const infoBlock = info(`Connecting to ${URL}`, true)
   const connection = await connect(URL).catch((e) => {
@@ -96,4 +101,4 @@ async function main() {
   })
 }
 
-main()
+main().catch(error)

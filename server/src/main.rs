@@ -5,7 +5,7 @@ use env_logger::Env;
 async fn main() {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
-    let addr = "0.0.0.0:8523";
+    let addr = "0.0.0.0:7543";
     SimulationServer::bind(&addr)
         .await
         .expect(&format!("failed to bind to {addr}"))
