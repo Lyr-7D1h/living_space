@@ -2,7 +2,7 @@ import iro from '@jaames/iro'
 import { type Connection, connect } from './connection'
 import { error, info } from './util'
 
-const colorPicker = new iro.ColorPicker('#color', {
+const colorPicker = iro.ColorPicker('#color', {
   width: 300,
   color: '#29A4DA',
 })

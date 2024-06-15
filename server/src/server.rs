@@ -157,19 +157,24 @@ async fn session<'n>(
                     Message::Close(_) => return Ok(()),
                     _ => return Err(anyhow!("invalid message data type")),
                 };
+
+                // update latest config if new config set
+                match command {
+                    Command::Config(ref c) => {
+                        let mut s = state.lock().await;
+                        s.latest_config = Some(c.clone());
+                    }
+                    _ => {}
+                }
                 tx.send(command)?;
             }
         };
 
         if let Ok(cmd) = rx.try_recv() {
             match cmd {
-                Command::Config(ref config) => {
-                    if let ConnectionType::Controller = connection_type {
-                        let mut s = state.lock().await;
-                        s.latest_config = Some(config.clone());
-                        let value = serde_json::to_string(&cmd).context("failed to send cmd")?;
-                        stream.send(Message::Text(value)).await?;
-                    }
+                Command::Config(_) => {
+                    let value = serde_json::to_string(&cmd).context("failed to send cmd")?;
+                    stream.send(Message::Text(value)).await?;
                 }
                 Command::Create { .. } => {
                     if let ConnectionType::Canvas = connection_type {
