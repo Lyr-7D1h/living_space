@@ -1,5 +1,5 @@
 import { Color } from './color'
-import { COLORING_PERCENT, CREATURE_SIZE } from './constants'
+import { COLORING_PERCENT, CREATURE_SIZE, DEBUG } from './constants'
 import { Creature } from './creature'
 import { debug } from './log'
 import { vec2 } from './vec'
@@ -73,16 +73,19 @@ export class Simulation {
     map.fill(0, 0, map.width, map.height, new Color(255, 255, 255))
 
     requestAnimationFrame(() => {
-      perf(() => {
+      if (DEBUG) {
+        perf(() => {
+          this.drawLoop(map)
+        })
+      } else {
         this.drawLoop(map)
-      })
+      }
     })
   }
 
   private drawLoop(map: ImageBuffer) {
     // this.ctx.putImageData(map.data, 0, 0)
     for (const c of this.creatures) {
-      // console.log(c.color.c, c.position.vec)
       // update character
       c.step()
       const { x, y } = c.position
@@ -117,9 +120,13 @@ export class Simulation {
     this.ctx.putImageData(cmap.data, 0, 0)
 
     requestAnimationFrame(() => {
-      perf(() => {
+      if (DEBUG) {
+        perf(() => {
+          this.drawLoop(map)
+        })
+      } else {
         this.drawLoop(map)
-      })
+      }
     })
   }
 
@@ -127,23 +134,4 @@ export class Simulation {
     debug(`Adding creature ${JSON.stringify(creature)}`)
     this.creatures.push(creature)
   }
-
-  /** debug grid */
-  // grid() {
-  //   this.ctx.stroke()
-  //   for (let x = 0; x < this.map.width; x++) {
-  //     this.ctx.moveTo(x * this.map.tileWidth, 0)
-  //     this.ctx.lineTo(
-  //       x * this.map.tileWidth,
-  //       this.map.height * this.map.tileHeight,
-  //     )
-  //   }
-  //   for (let y = 0; y < this.map.height; y++) {
-  //     this.ctx.moveTo(0, y * this.map.tileHeight)
-  //     this.ctx.lineTo(
-  //       this.map.width * this.map.tileWidth,
-  //       y * this.map.tileHeight,
-  //     )
-  //   }
-  // }
 }

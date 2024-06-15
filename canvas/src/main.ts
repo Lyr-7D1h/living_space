@@ -1,15 +1,10 @@
 import { Color } from './color'
 import { type Command, connect } from './connection'
+import { SYNC_SERVER_URL } from './constants'
 import { Creature } from './creature'
 import { Simulation } from './simulation'
 import { error } from './util'
 import { vec2 } from './vec'
-
-let URL = 'ws://localhost:7543'
-const host = new URLSearchParams(window.location.search).get('host')
-if (host !== null) {
-  URL = `ws://${host}:7543`
-}
 
 const simulation = new Simulation()
 simulation.start()
@@ -18,12 +13,18 @@ simulation.start()
 window.simulation = simulation
 
 async function sync() {
-  let connection = await connect(URL).catch((e) => {
+  let url = SYNC_SERVER_URL
+  const host = new URLSearchParams(window.location.search).get('host')
+  if (host !== null) {
+    url = `ws://${host}:7543`
+  }
+
+  let connection = await connect(url).catch((e) => {
     error(e)
   })
 
   while (typeof connection === 'undefined') {
-    connection = await connect(URL).catch((e) => {
+    connection = await connect(url).catch((e) => {
       error(e)
     })
   }
