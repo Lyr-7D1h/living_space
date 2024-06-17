@@ -61,6 +61,71 @@ export class ImageBuffer {
     }
   }
 
+  fadingGradientCircle(p: Vector<2>, r: number, c: Color, percentage: number) {
+    let x = r
+    let y = 0
+    let d = 1 - x
+    while (x >= y) {
+      let fadingPerc = percentage * (Math.abs(1 + r - y) / r)
+      this.fadingGradientHorizontalLine(p.x - x, 2 * x, p.y + y, c, fadingPerc)
+      if (y !== 0) {
+        this.fadingGradientHorizontalLine(
+          p.x - x,
+          2 * x,
+          p.y - y,
+          c,
+          fadingPerc,
+        )
+      }
+
+      y++
+      if (d > 0) {
+        if (x >= y) {
+          fadingPerc = percentage * (Math.abs(r - x + 1) / r)
+          this.fadingGradientHorizontalLine(
+            p.x - y + 1,
+            2 * y - 1,
+            p.y - x,
+            c,
+            fadingPerc,
+          )
+          this.fadingGradientHorizontalLine(
+            p.x - y + 1,
+            2 * y - 1,
+            p.y + x,
+            c,
+            fadingPerc,
+          )
+        }
+        // go down
+        x--
+        d += 2 * (y - x + 1)
+      } else {
+        // go east
+        d += 2 * y + 1
+      }
+    }
+  }
+
+  fadingGradientHorizontalLine(
+    x: number,
+    dx: number,
+    y: number,
+    c: Color,
+    percentage: number,
+  ) {
+    const mid = dx / 2
+    const o = y * this.width * 4
+    for (let xi = 0; xi < dx; xi++) {
+      const xo = (x + xi) * 4 + o
+      const fadingPerc = percentage * (1 - Math.abs((mid - xi) / mid))
+      for (let i = 0; i < 4; i++) {
+        const diff = c.c[i % 4]! - this.buffer[i]!
+        this.buffer[xo + i] += Math.sign(diff) * Math.abs(diff) * fadingPerc
+      }
+    }
+  }
+
   /** https://en.wikipedia.org/wiki/Midpoint_circle_algorithm */
   gradientCircle(p: Vector<2>, r: number, c: Color, percentage: number) {
     let x = r

@@ -69,7 +69,7 @@ export function setupCreator(
     connection.send({
       type: 'create',
       position: [scale(position[0]), scale(position[1])],
-      size: 4,
+      size: 2,
       color,
       characteristics: {
         curiosity: parseInt(data.get('curiosity')! as string),

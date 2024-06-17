@@ -9,21 +9,21 @@ export interface Characteristics {
   friendliness: number
 }
 
-export type CreatureArgs =
+export type CreatureArgs = {
+  position: Vector<2>
+  size: number
+  color: Color
+  coloringPercentage: number
+  coloringSpread: number
+} & (
   | {
-      position: Vector<2>
-      size: number
-      color: Color
-      coloringPercentage: number
       preference: CDF
       speed: number
     }
   | {
-      position: Vector<2>
-      size: number
-      color: Color
       characteristics: Characteristics
     }
+)
 
 export const neighbors = [
   vec2(-1, -1),
@@ -58,7 +58,8 @@ export class Creature {
       size: 2,
       preference,
       coloringPercentage: 0.01,
-      speed: 1, // 1 + Math.round(Math.random() * 4),
+      coloringSpread: 10,
+      speed: 1 + Math.round(Math.random() * 4),
       ...args,
     })
   }
