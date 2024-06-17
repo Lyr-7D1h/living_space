@@ -13,10 +13,10 @@ export type CreatureArgs = {
   position: Vector<2>
   size: number
   color: Color
-  coloringPercentage: number
-  coloringSpread: number
 } & (
   | {
+      coloringPercentage: number
+      coloringSpread: number
       preference: CDF
       speed: number
     }
@@ -42,6 +42,7 @@ export class Creature {
   size: number
   color: Color
   coloringPercentage: number
+  coloringSpread: number
   speed: number
   preference: CDF
 
@@ -49,17 +50,15 @@ export class Creature {
     const x = () => Math.floor(Math.random() * window.innerWidth)
     const y = () => Math.floor(Math.random() * window.innerHeight)
     const c = () => Math.floor(Math.random() * 255)
-    const preference = new CDF(
-      ...Array.from({ length: 9 }, (_) => Math.floor(Math.random() * 50)),
-    )
     return new Creature({
       position: vec2(x(), y()),
       color: new Color(c(), c(), c()),
       size: 2,
-      preference,
-      coloringPercentage: 0.01,
-      coloringSpread: 10,
-      speed: 1 + Math.round(Math.random() * 4),
+      characteristics: {
+        curiosity: Math.random(),
+        dominance: Math.random(),
+        friendliness: Math.random(),
+      },
       ...args,
     })
   }
@@ -72,6 +71,7 @@ export class Creature {
       this.speed = args.speed
       this.preference = args.preference
       this.coloringPercentage = args.coloringPercentage
+      this.coloringSpread = args.coloringSpread
     } else {
       const c = args.characteristics
       // get all chars as a percentage of total
@@ -81,7 +81,8 @@ export class Creature {
       const friendliness = c.friendliness / sum
 
       this.speed = 1 + Math.round(4 * curiosity)
-      this.coloringPercentage = 0.015 + 0.1 * roundTwoDec(dominance)
+      this.coloringSpread = 10 - Math.round(4 * dominance)
+      this.coloringPercentage = roundTwoDec(0.015 + 0.05 * dominance)
       this.preference = new CDF(
         ...Array.from({ length: 9 }, (_) => Math.floor(Math.random() * 50)),
       )

@@ -67,16 +67,15 @@ export class Simulation {
   }
 
   private draw() {
-    for (let i = 0; i < 500; i++) {
-      this.creatures.push(Creature.random())
-    }
+    // for (let i = 0; i < 1000; i++) {
+    //   this.creatures.push(Creature.random())
+    // }
 
     const map = new ImageBuffer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
     )
     // initialize canvas with white pixels, looks slightly better on borders
     map.fill(0, 0, map.width, map.height, new Color(255, 255, 255))
-    // map.fadingGradientCircle(vec2(60, 60), 10, new Color(255, 0, 0), 0.5)
 
     requestAnimationFrame(() => {
       if (DEBUG) {
@@ -110,7 +109,12 @@ export class Simulation {
       const c = this.creatures[i]!
       const p = c.position
       // map.gradientCircle(p, 10, c.color, c.coloringPercentage)
-      map.fadingGradientCircle(p, 10, c.color, c.coloringPercentage)
+      map.fadingGradientCircle(
+        p,
+        c.coloringSpread,
+        c.color,
+        c.coloringPercentage,
+      )
       // map.gradientRectangle(
       //   p.x - 5,
       //   p.y - 5,
