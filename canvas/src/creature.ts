@@ -6,7 +6,7 @@ import { type Vector, vec2 } from './vec'
 export interface Characteristics {
   curiosity: number
   dominance: number
-  friendliness: number
+  // friendliness: number
 }
 
 export type CreatureArgs = {
@@ -57,7 +57,7 @@ export class Creature {
       characteristics: {
         curiosity: Math.random(),
         dominance: Math.random(),
-        friendliness: Math.random(),
+        // friendliness: Math.random(),
       },
       ...args,
     })
@@ -75,10 +75,10 @@ export class Creature {
     } else {
       const c = args.characteristics
       // get all chars as a percentage of total
-      const sum = c.curiosity + c.dominance + c.friendliness
+      const sum = c.curiosity + c.dominance // + c.friendliness
       const curiosity = c.curiosity / sum
       const dominance = c.dominance / sum
-      const friendliness = c.friendliness / sum
+      // const friendliness = c.friendliness / sum
 
       this.speed = 1 + Math.round(4 * curiosity)
       this.coloringSpread = 10 - Math.round(4 * dominance)

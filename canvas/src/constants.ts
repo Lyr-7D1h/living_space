@@ -1,2 +1,2 @@
 export const SYNC_SERVER_URL = 'ws://localhost:7543'
-export const DEBUG = true
+export const DEBUG = false

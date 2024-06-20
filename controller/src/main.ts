@@ -1,6 +1,6 @@
 import iro from '@jaames/iro'
 import { type Connection, connect } from './connection'
-import { error, info } from './util'
+import { error } from './util'
 
 const colorPicker = iro.ColorPicker('#color', {
   width: 300,
@@ -74,7 +74,6 @@ export function setupCreator(
       characteristics: {
         curiosity: parseInt(data.get('curiosity')! as string),
         dominance: parseInt(data.get('dominance')! as string),
-        friendliness: parseInt(data.get('friendliness')! as string),
       },
     })
     submit.setAttribute('disabled', '')

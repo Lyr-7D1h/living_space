@@ -43,7 +43,7 @@ pub enum ConnectionType {
 pub struct Characteristics {
     curiosity: u32,
     dominance: u32,
-    friendliness: u32,
+    // friendliness: u32,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

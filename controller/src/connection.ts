@@ -38,7 +38,7 @@ export type Message =
 export interface Characteristics {
   curiosity: number
   dominance: number
-  friendliness: number
+  // friendliness: number
 }
 export interface CreatureArgs {
   position: number[]
