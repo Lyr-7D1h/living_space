@@ -81,7 +81,7 @@ export class Creature {
       const friendliness = c.friendliness / sum
 
       this.speed = 1 + Math.round(4 * curiosity)
-      this.coloringSpread = 10 - Math.round(4 * dominance)
+      this.coloringSpread = 10 - Math.round(3 * dominance)
       this.coloringPercentage = roundTwoDec(0.015 + 0.05 * dominance)
       this.preference = new CDF(
         ...Array.from({ length: 9 }, (_) => Math.floor(Math.random() * 50)),

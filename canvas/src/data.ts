@@ -179,6 +179,26 @@ export class ImageBuffer {
     }
   }
 
+  horizontalLine(x: number, dx: number, y: number, c: Color) {
+    // const o = y * this.width * 4
+    // for (let i = x * 4 + o; i < (x + dx) * 4 + o; i++) {
+    //   this.buffer[i] += c.c[i % 4]!
+    // }
+    for (let xi = x; xi < x + dx; xi++) {
+      this.set(xi, y, c)
+      // this.buffer[i] += c.c[i % 4]!
+    }
+  }
+
+  verticalLine(y: number, dy: number, x: number, c: Color) {
+    // const o = x * 4
+    // const width = this.width
+    for (let yi = y; yi < y + dy; yi++) {
+      this.set(x, yi, c)
+      // this.buffer[i] += c.c[i % 4]!
+    }
+  }
+
   set(x: number, y: number, value: Color): void
   set(
     x: number,

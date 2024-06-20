@@ -9,16 +9,15 @@ Make creatures with different characteristics that will interact with each other
   - tendencies
   - make connections with other creatures
   - procreate with other creatures
-- decrease coloring strength the further from mid point of character paint is
 - Create creatures on touch
 - on death explode color to neighboring tiles
 - different color space
 - slowly create more and more advanced civilization over time
   - natural disasters to slow progress down
-- add antialiasing
+- add anti-aliasing
 - Running canvas state on a server
 
-# Kiosk
+## Kiosk
 
 For setting up a kiosk device with a pi I followed https://reelyactive.github.io/diy/pi-kiosk/
 
@@ -74,3 +73,6 @@ cargo run
 
 chromium-browser --display=:0 --kiosk --incognito --window-position=0,0 http://localhost:5174
 ```
+
+## Roadmap
+- Use voronoi and trapezoidal maps for nearest neighbor search https://stackoverflow.com/questions/1901139/closest-point-to-a-given-point

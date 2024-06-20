@@ -10,6 +10,7 @@ type Y<N extends number> = N extends 3
     ? number
     : undefined
 type Z<N extends number> = N extends 3 ? number : undefined
+// FIXME: make me not an object but just an array with util function and typing
 export class Vector<N extends number> {
   vec: NArray<N>
   constructor(...vec: NArray<N>) {

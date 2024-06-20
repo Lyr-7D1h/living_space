@@ -5,6 +5,7 @@ import { debug } from './log'
 import { vec2 } from './vec'
 import { ImageBuffer } from './data'
 import { Debug } from './debug'
+import { Map, SPACING } from './map'
 
 const debugEl = new Debug()
 
@@ -45,7 +46,6 @@ export class Simulation {
 
   start() {
     this.setup()
-    // this.grid();
 
     this.draw()
   }
@@ -67,32 +67,55 @@ export class Simulation {
   }
 
   private draw() {
-    // for (let i = 0; i < 1000; i++) {
-    //   this.creatures.push(Creature.random())
-    // }
+    for (let i = 0; i < 1; i++) {
+      this.creatures.push(Creature.random())
+    }
 
-    const map = new ImageBuffer(
+    const painting = new ImageBuffer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
     )
     // initialize canvas with white pixels, looks slightly better on borders
-    map.fill(0, 0, map.width, map.height, new Color(255, 255, 255))
+    painting.fill(
+      0,
+      0,
+      painting.width,
+      painting.height,
+      new Color(255, 255, 255),
+    )
 
-    requestAnimationFrame(() => {
-      if (DEBUG) {
-        perf(() => {
-          this.drawLoop(map)
-        })
-      } else {
-        this.drawLoop(map)
-      }
-    })
+    const map = new Map(this.canvas.width, this.canvas.height)
+
+    // requestAnimationFrame(() => {
+    //   if (DEBUG) {
+    //     perf(() => {
+    //       this.drawLoop(painting)
+    //     })
+    //   } else {
+    //     this.drawLoop(painting)
+    //   }
+    // })
+    setInterval(() => {
+      this.drawLoop(painting, map)
+    }, 500)
   }
 
-  private drawLoop(map: ImageBuffer) {
+  private drawLoop(painting: ImageBuffer, map: Map) {
     if (DEBUG) {
       debugEl.set('pixels', this.creatures.length)
     }
-    // this.ctx.putImageData(map.data, 0, 0)
+
+    for (let ci = 0; ci < this.creatures.length; ci++) {
+      for (const cni of map.nearestNeighbors(
+        this.creatures[ci]!.position.vec,
+        50,
+      )) {
+        const [cx, cy] = this.creatures[cni]!.position.vec
+
+        const neighbor = this.creatures[cni]!
+        console.log(neighbor)
+      }
+    }
+
     for (const c of this.creatures) {
       // update character
       c.step()
@@ -109,7 +132,7 @@ export class Simulation {
       const c = this.creatures[i]!
       const p = c.position
       // map.gradientCircle(p, 10, c.color, c.coloringPercentage)
-      map.fadingGradientCircle(
+      painting.fadingGradientCircle(
         p,
         c.coloringSpread,
         c.color,
@@ -124,24 +147,34 @@ export class Simulation {
       //   COLORING_PERCENT,
       // )
     }
-    const cmap = map.clone()
 
+    const cpainting = painting.clone()
+
+    // draw creatures
     for (let i = 0; i < this.creatures.length; i++) {
       const c = this.creatures[i]!
       const p = c.position
-      cmap.fill(p.x, p.y, c.size, c.size, c.color)
+      cpainting.fill(p.x, p.y, c.size, c.size, c.color)
     }
-    this.ctx.putImageData(cmap.data, 0, 0)
 
-    requestAnimationFrame(() => {
-      if (DEBUG) {
-        perf(() => {
-          this.drawLoop(map)
-        })
-      } else {
-        this.drawLoop(map)
-      }
-    })
+    for (let x = SPACING; x < cpainting.width; x += SPACING) {
+      cpainting.verticalLine(0, cpainting.height, x, new Color(0, 0, 0))
+    }
+    for (let y = SPACING; y < cpainting.height; y += SPACING) {
+      cpainting.horizontalLine(0, cpainting.width, y, new Color(0, 0, 0))
+    }
+
+    this.ctx.putImageData(cpainting.data, 0, 0)
+
+    // requestAnimationFrame(() => {
+    //   if (DEBUG) {
+    //     perf(() => {
+    //       this.drawLoop(painting)
+    //     })
+    //   } else {
+    //     this.drawLoop(painting)
+    //   }
+    // })
   }
 
   addCreature(creature: Creature) {
