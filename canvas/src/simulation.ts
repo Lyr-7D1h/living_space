@@ -3,7 +3,7 @@ import { DEBUG } from './constants'
 import { Creature } from './creature'
 import { debug } from './log'
 import { vec2 } from './vec'
-import { ImageBuffer } from './data'
+import { ImageBuffer } from './imageBuffer'
 import { Debug } from './debug'
 import { Map, SPACING } from './map'
 
@@ -23,6 +23,7 @@ function perf(cb: () => void) {
 export class Simulation {
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
+  painting: ImageBuffer
   creatures: Creature[]
 
   constructor() {
@@ -34,6 +35,13 @@ export class Simulation {
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
     this.creatures = []
+    for (let i = 0; i < 1; i++) {
+      this.creatures.push(Creature.random())
+    }
+
+    this.painting = new ImageBuffer(
+      this.ctx.createImageData(this.canvas.width, this.canvas.height),
+    )
   }
 
   get width() {
@@ -67,23 +75,19 @@ export class Simulation {
   }
 
   private draw() {
-    for (let i = 0; i < 1; i++) {
-      this.creatures.push(Creature.random())
-    }
+    const map = new Map(this.canvas.width, this.canvas.height)
 
-    const painting = new ImageBuffer(
-      this.ctx.createImageData(this.canvas.width, this.canvas.height),
-    )
     // initialize canvas with white pixels, looks slightly better on borders
-    painting.fill(
+    this.painting.rectangle(
       0,
       0,
-      painting.width,
-      painting.height,
+      this.painting.width,
+      this.painting.height,
       new Color(255, 255, 255),
     )
 
-    const map = new Map(this.canvas.width, this.canvas.height)
+    // const i = map.getIndex([100, 50])
+    // console.log(i, map.rowLength)
 
     // requestAnimationFrame(() => {
     //   if (DEBUG) {
@@ -95,24 +99,31 @@ export class Simulation {
     //   }
     // })
     setInterval(() => {
-      this.drawLoop(painting, map)
+      this.drawLoop(map)
     }, 500)
   }
 
-  private drawLoop(painting: ImageBuffer, map: Map) {
+  private drawLoop(map: Map) {
     if (DEBUG) {
       debugEl.set('pixels', this.creatures.length)
     }
 
+    map.update(this.creatures)
+
     for (let ci = 0; ci < this.creatures.length; ci++) {
+      const c = this.creatures[ci]!
       for (const cni of map.nearestNeighbors(
         this.creatures[ci]!.position.vec,
         50,
       )) {
-        const [cx, cy] = this.creatures[cni]!.position.vec
+        // skip itself
+        if (cni === ci) continue
 
         const neighbor = this.creatures[cni]!
-        console.log(neighbor)
+        const [cx, cy] = neighbor.position.vec
+        const [x, y] = c.position.vec
+
+        c.attraction
       }
     }
 
@@ -132,7 +143,7 @@ export class Simulation {
       const c = this.creatures[i]!
       const p = c.position
       // map.gradientCircle(p, 10, c.color, c.coloringPercentage)
-      painting.fadingGradientCircle(
+      this.painting.fadingGradientCircle(
         p,
         c.coloringSpread,
         c.color,
@@ -148,13 +159,13 @@ export class Simulation {
       // )
     }
 
-    const cpainting = painting.clone()
+    const cpainting = this.painting.clone()
 
     // draw creatures
     for (let i = 0; i < this.creatures.length; i++) {
       const c = this.creatures[i]!
       const p = c.position
-      cpainting.fill(p.x, p.y, c.size, c.size, c.color)
+      cpainting.rectangle(p.x, p.y, c.size, c.size, c.color)
     }
 
     for (let x = SPACING; x < cpainting.width; x += SPACING) {

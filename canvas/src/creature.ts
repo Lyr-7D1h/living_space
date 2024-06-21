@@ -25,16 +25,16 @@ export type CreatureArgs = {
     }
 )
 
-export const neighbors = [
-  vec2(-1, -1),
-  vec2(-1, 1),
-  vec2(0, -1),
-  vec2(-1, 0),
+const directions = [
   vec2(0, 0),
   vec2(1, 0),
-  vec2(0, 1),
-  vec2(1, -1),
   vec2(1, 1),
+  vec2(0, 1),
+  vec2(-1, 1),
+  vec2(-1, 0),
+  vec2(-1, -1),
+  vec2(0, -1),
+  vec2(1, -1),
 ]
 
 export class Creature {
@@ -45,6 +45,7 @@ export class Creature {
   coloringSpread: number
   speed: number
   preference: CDF
+  attraction: CDF
 
   static random(args?: Partial<CreatureArgs>) {
     const x = () => Math.floor(Math.random() * window.innerWidth)
@@ -67,6 +68,7 @@ export class Creature {
     this.position = args.position
     this.size = args.size
     this.color = args.color
+    this.attraction = CDF.uniform(9)
     if ('speed' in args) {
       this.speed = args.speed
       this.preference = args.preference
@@ -83,18 +85,16 @@ export class Creature {
       this.speed = 1 + Math.round(4 * curiosity)
       this.coloringSpread = 10 - Math.round(3 * dominance)
       this.coloringPercentage = roundTwoDec(0.015 + 0.05 * dominance)
-      this.preference = new CDF(
-        ...Array.from({ length: 9 }, (_) => Math.floor(Math.random() * 50)),
+      this.preference = CDF.fromWeights(
+        Array.from({ length: 9 }, (_) => Math.random()),
       )
     }
   }
 
   /** take a step into a direction based on characteristics */
   step() {
-    // const probs = [80, 20, 0, 20, 20, 20, 20, 0, 20]
-    // probs[this.prev] = 0
     const i = this.preference.draw()
-    const m = neighbors[i]!
+    const m = directions[i]!
     this.position.add(m.clone().scale(this.speed))
   }
 }

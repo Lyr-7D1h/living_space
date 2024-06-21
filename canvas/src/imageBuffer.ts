@@ -31,12 +31,11 @@ export class ImageBuffer {
     return this.data.height
   }
 
-  fill(x: number, y: number, dx: number, dy: number, c: Color) {
-    const v = [c.r, c.g, c.b, 255]
+  rectangle(x: number, y: number, dx: number, dy: number, c: Color) {
     const width = this.data.width * 4
     for (let o = y * width; o <= (y + dy) * width; o += width) {
       for (let d = x * 4; d <= (x + dx) * 4; d++) {
-        this.buffer[o + d] = v[d % 4]!
+        this.buffer[o + d] = c.c[d % 4]!
       }
     }
   }

@@ -1,3 +1,5 @@
+import { Color } from './color'
+import { DEBUG } from './constants'
 import { type Creature } from './creature'
 
 // TODO: find a better spacing given width and height
@@ -25,8 +27,8 @@ export class Map {
     this.width = width
     this.height = height
 
-    this.rowLength = Math.floor(width / SPACING)
-    this.columnLength = Math.floor(height / SPACING)
+    this.rowLength = Math.ceil(width / SPACING)
+    this.columnLength = Math.ceil(height / SPACING)
 
     const size = this.rowLength * this.columnLength
 
@@ -58,14 +60,14 @@ export class Map {
       this.cellStart[i] = start
     }
 
-    for (const c of creatures) {
-      const i = this.getIndex(c.position.vec)
+    for (let ci = 0; ci < creatures.length; ci++) {
+      const i = this.getIndex(creatures[ci]!.position.vec)
       this.cellStart[i]--
-      this.cellEntries[this.cellStart[i]!] = i
+      this.cellEntries[this.cellStart[i]!] = ci
     }
-    console.log('update', this.cellStart, this.cellEntries)
   }
 
+  /** get the index of a tile from normal cartesian coordiantes */
   getIndex([x, y]: [number, number]) {
     // wrap coords
     if (x < 0) x = this.width + x
@@ -74,38 +76,71 @@ export class Map {
     if (y > this.height - 1) {
       y = y % this.height
     }
-    return Math.floor(x / SPACING) * Math.floor(y / SPACING)
+    return Math.floor(x / SPACING) + Math.round(y / SPACING) * this.rowLength
+  }
+
+  /** get the index of a tile given row and column */
+  get(i: number, j: number) {
+    // wrap coords
+    if (i < 0) i = this.rowLength + i
+    if (i >= this.rowLength) i = i % this.rowLength
+    if (j < 0) j = this.columnLength + j
+    if (j >= this.columnLength) {
+      j = j % this.columnLength
+    }
+    return i + j * this.rowLength
+  }
+
+  coordsFromIndex(index: number) {
+    return [
+      (index % this.rowLength) * SPACING,
+      Math.floor(index / this.rowLength) * SPACING,
+    ]
   }
 
   nearestNeighbors([x, y]: [number, number], distance: number): Iterator {
     this.querySize = 0
 
-    let xi = x - distance
-    let yi = y - distance
+    const x0 = Math.floor((x - distance) / SPACING)
+    const y0 = Math.floor((y - distance) / SPACING)
 
-    const x0 = x + distance
-    const y0 = y + distance
+    const x1 = Math.floor((x + distance) / SPACING)
+    const y1 = Math.floor((y + distance) / SPACING)
 
+    if (DEBUG) {
+      window.simulation.painting.gradientRectangle(
+        x - distance,
+        y - distance,
+        distance * 2,
+        distance * 2,
+        new Color(0, 255, 0),
+        0.1,
+      )
+    }
     distance = distance ** 2
-    for (yi; yi <= y0; yi += SPACING) {
-      for (xi; xi <= x0; xi += SPACING) {
-        const i = this.getIndex([xi, yi])
+    for (let yi = y0; yi <= y1; yi++) {
+      for (let xi = x0; xi <= x1; xi++) {
+        const index = this.get(xi, yi)
 
-        window.simulation.ctx.fillStyle = 'rgb(255,0,0)'
-        console.log(Math.floor((i * SPACING) % this.width))
-        window.simulation.ctx.fillRect(
-          Math.floor(i % this.rowLength) * SPACING,
-          Math.floor(i / this.columnLength) * SPACING,
-          20,
-          20,
-        )
-        for (let j = this.cellStart[i]!; j < this.cellStart[i + 1]!; j++) {
+        if (DEBUG) {
+          window.simulation.painting.gradientRectangle(
+            (index % this.rowLength) * SPACING,
+            Math.floor(index / this.rowLength) * SPACING,
+            SPACING,
+            SPACING,
+            new Color(255, 0, 0),
+            0.1,
+          )
+        }
+
+        for (
+          let j = this.cellStart[index]!;
+          j < this.cellStart[index + 1]!;
+          j++
+        ) {
           const ci = this.cellEntries[j]!
-
-          // if (cx ** 2 + cy ** 2 <= distance) {
           this.queryIds[this.querySize] = ci
           this.querySize++
-          // }
         }
       }
     }

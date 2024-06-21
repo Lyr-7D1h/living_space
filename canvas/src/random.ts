@@ -1,49 +1,59 @@
 import { roundTwoDec } from './util'
 
 export class PMF {
-  f: number[]
+  p: number[]
 
-  constructor(...values: number[]) {
+  fromWeights(values: number[]) {
     const sum = values.reduce((partialSum, a) => partialSum + a, 0)
-    this.f = values.map((v) => v / sum)
-    console.log(this.f)
+    const f = values.map((v) => v / sum)
+    return new PMF(f)
+  }
+
+  constructor(p: number[]) {
+    this.p = p
   }
 
   set(index: number, value: number) {
-    this.f[index] = value
+    this.p[index] = value
     // renormalize
-    const sum = this.f.reduce((partialSum, a) => partialSum + a, 0)
-    this.f = this.f.map((v) => v / sum)
+    const sum = this.p.reduce((partialSum, a) => partialSum + a, 0)
+    this.p = this.p.map((v) => v / sum)
   }
 
   [Symbol.iterator]() {
-    return this.f[Symbol.iterator]()
+    return this.p[Symbol.iterator]()
   }
 
   cdf() {
-    return CDF.fromPdf(this)
+    return CDF.fromPMF(this)
   }
 }
 
 export class CDF {
   f: number[]
 
-  static fromPdf(pmf: PMF) {
+  static fromPMF(pmf: PMF) {
     let a = 0
 
-    const cdf = pmf.f.map((p) => {
+    const f = pmf.p.map((p) => {
       a += p
       return a
     })
 
     // account for floating point errors
-    cdf[cdf.length - 1] = 1
+    f[f.length - 1] = 1
 
-    return new CDF(...cdf)
+    return new CDF(f)
   }
 
-  /** create cdf from numbers going up from 0 to 1 */
-  constructor(...values: number[]) {
+  static uniform(length: number) {
+    const p: number[] = new Array(length).fill(roundTwoDec(1 / length))
+
+    return CDF.fromPMF(new PMF(p))
+  }
+
+  /** Create a cdf from non normalized list of weights */
+  static fromWeights(values: number[]) {
     const sum = values.reduce((partialSum, a) => partialSum + a, 0)
     let f = values.map((v) => v / sum)
     let a = 0
@@ -54,6 +64,12 @@ export class CDF {
     })
     // account for floating point errors
     f[f.length - 1] = 1
+    return new CDF(f)
+  }
+
+  /** create cdf from numbers going up from 0 to 1 */
+  constructor(f: number[]) {
+    if (f[f.length - 1] !== 1) throw Error('Invalid cdf')
     this.f = f
   }
 
