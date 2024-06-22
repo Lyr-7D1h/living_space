@@ -1,11 +1,13 @@
 import { Color } from './color'
-import { DEBUG } from './constants'
+import { CONSTANT_TIME, DEBUG_INFO, DEBUG_VISUAL } from './constants'
 import { Creature } from './creature'
 import { debug } from './log'
 import { vec2 } from './vec'
 import { ImageBuffer } from './imageBuffer'
 import { Debug } from './debug'
 import { Map, SPACING } from './map'
+import { mod } from './math'
+import { PMF } from './random'
 
 const debugEl = new Debug()
 
@@ -13,7 +15,7 @@ function perf(cb: () => void) {
   const start = Date.now()
   cb()
   const d = Date.now() - start
-  if (DEBUG) {
+  if (DEBUG_INFO) {
     debugEl.set('fps', `${Math.round(1000 / d)}`)
     debugEl.set('delay', `${d}ms`)
   }
@@ -35,9 +37,12 @@ export class Simulation {
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
     this.creatures = []
-    for (let i = 0; i < 1; i++) {
-      this.creatures.push(Creature.random())
-    }
+    this.creatures.push(Creature.random({ position: vec2(600, 600) }))
+    this.creatures.push(Creature.random({ position: vec2(500, 500) }))
+
+    // for (let i = 0; i < 1; i++) {
+    //   this.creatures.push(Creature.random())
+    // }
 
     this.painting = new ImageBuffer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
@@ -89,22 +94,26 @@ export class Simulation {
     // const i = map.getIndex([100, 50])
     // console.log(i, map.rowLength)
 
-    // requestAnimationFrame(() => {
-    //   if (DEBUG) {
-    //     perf(() => {
-    //       this.drawLoop(painting)
-    //     })
-    //   } else {
-    //     this.drawLoop(painting)
-    //   }
-    // })
-    setInterval(() => {
-      this.drawLoop(map)
-    }, 500)
+    if (CONSTANT_TIME > 0) {
+      setInterval(() => {
+        this.drawLoop(map)
+      }, 500)
+
+      return
+    }
+    requestAnimationFrame(() => {
+      if (DEBUG_INFO) {
+        perf(() => {
+          this.drawLoop(map)
+        })
+      } else {
+        this.drawLoop(map)
+      }
+    })
   }
 
   private drawLoop(map: Map) {
-    if (DEBUG) {
+    if (DEBUG_INFO) {
       debugEl.set('pixels', this.creatures.length)
     }
 
@@ -114,7 +123,7 @@ export class Simulation {
       const c = this.creatures[ci]!
       for (const cni of map.nearestNeighbors(
         this.creatures[ci]!.position.vec,
-        50,
+        200,
       )) {
         // skip itself
         if (cni === ci) continue
@@ -123,7 +132,21 @@ export class Simulation {
         const [cx, cy] = neighbor.position.vec
         const [x, y] = c.position.vec
 
-        c.attraction
+        const theta = Math.atan2(cy - y, cx - x)
+        // angle from 0 to 2pi
+        const d = Math.PI / 6
+        const i = mod(Math.round((theta - d) / d), 8)
+        // build a binomial pmf for going towards a certain point
+        const attraction: number[] = new Array(9).fill(0)
+        // offset by 1 because creatures can also stay in position
+        attraction[1 + mod(i - 2, 8)] = 1 / 16
+        attraction[1 + mod(i + 2, 8)] = 1 / 16
+        attraction[1 + mod(i - 1, 8)] = 4 / 16
+        attraction[1 + mod(i + 1, 8)] = 4 / 16
+        attraction[1 + i] = 6 / 16
+        const pmf = new PMF(attraction)
+        console.log('attraction', attraction, i)
+        c.updateWalk(pmf)
       }
     }
 
@@ -168,24 +191,28 @@ export class Simulation {
       cpainting.rectangle(p.x, p.y, c.size, c.size, c.color)
     }
 
-    for (let x = SPACING; x < cpainting.width; x += SPACING) {
-      cpainting.verticalLine(0, cpainting.height, x, new Color(0, 0, 0))
-    }
-    for (let y = SPACING; y < cpainting.height; y += SPACING) {
-      cpainting.horizontalLine(0, cpainting.width, y, new Color(0, 0, 0))
+    if (DEBUG_VISUAL) {
+      for (let x = SPACING; x < cpainting.width; x += SPACING) {
+        cpainting.verticalLine(0, cpainting.height, x, new Color(0, 0, 0))
+      }
+      for (let y = SPACING; y < cpainting.height; y += SPACING) {
+        cpainting.horizontalLine(0, cpainting.width, y, new Color(0, 0, 0))
+      }
     }
 
     this.ctx.putImageData(cpainting.data, 0, 0)
 
-    // requestAnimationFrame(() => {
-    //   if (DEBUG) {
-    //     perf(() => {
-    //       this.drawLoop(painting)
-    //     })
-    //   } else {
-    //     this.drawLoop(painting)
-    //   }
-    // })
+    if (CONSTANT_TIME === 0) {
+      requestAnimationFrame(() => {
+        if (DEBUG_INFO) {
+          perf(() => {
+            this.drawLoop(map)
+          })
+        } else {
+          this.drawLoop(map)
+        }
+      })
+    }
   }
 
   addCreature(creature: Creature) {

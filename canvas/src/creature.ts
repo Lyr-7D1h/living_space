@@ -1,5 +1,5 @@
 import { Color } from './color'
-import { CDF } from './random'
+import { CDF, type PMF } from './random'
 import { roundTwoDec } from './util'
 import { type Vector, vec2 } from './vec'
 
@@ -44,8 +44,9 @@ export class Creature {
   coloringPercentage: number
   coloringSpread: number
   speed: number
+
   preference: CDF
-  attraction: CDF
+  private walk: CDF
 
   static random(args?: Partial<CreatureArgs>) {
     const x = () => Math.floor(Math.random() * window.innerWidth)
@@ -68,7 +69,6 @@ export class Creature {
     this.position = args.position
     this.size = args.size
     this.color = args.color
-    this.attraction = CDF.uniform(9)
     if ('speed' in args) {
       this.speed = args.speed
       this.preference = args.preference
@@ -89,11 +89,21 @@ export class Creature {
         Array.from({ length: 9 }, (_) => Math.random()),
       )
     }
+    this.walk = this.preference.clone()
+  }
+
+  /** update the way this creature walks */
+  updateWalk(pmf: PMF) {
+    console.log('walk update')
+    console.log(this.walk.p)
+    this.walk = this.preference.clone()
+    this.walk.add(pmf)
+    console.log(this.walk.p)
   }
 
   /** take a step into a direction based on characteristics */
   step() {
-    const i = this.preference.draw()
+    const i = this.walk.draw()
     const m = directions[i]!
     this.position.add(m.clone().scale(this.speed))
   }

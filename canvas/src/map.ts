@@ -1,5 +1,5 @@
 import { Color } from './color'
-import { DEBUG } from './constants'
+import { DEBUG_INFO, DEBUG_VISUAL } from './constants'
 import { type Creature } from './creature'
 
 // TODO: find a better spacing given width and height
@@ -107,7 +107,7 @@ export class Map {
     const x1 = Math.floor((x + distance) / SPACING)
     const y1 = Math.floor((y + distance) / SPACING)
 
-    if (DEBUG) {
+    if (DEBUG_VISUAL) {
       window.simulation.painting.gradientRectangle(
         x - distance,
         y - distance,
@@ -122,7 +122,7 @@ export class Map {
       for (let xi = x0; xi <= x1; xi++) {
         const index = this.get(xi, yi)
 
-        if (DEBUG) {
+        if (DEBUG_VISUAL) {
           window.simulation.painting.gradientRectangle(
             (index % this.rowLength) * SPACING,
             Math.floor(index / this.rowLength) * SPACING,
