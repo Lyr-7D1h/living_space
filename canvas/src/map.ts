@@ -91,7 +91,7 @@ export class Map {
     return i + j * this.rowLength
   }
 
-  coordsFromIndex(index: number) {
+  coordsFromIndex(index: number): [number, number] {
     return [
       (index % this.rowLength) * SPACING,
       Math.floor(index / this.rowLength) * SPACING,
@@ -123,9 +123,10 @@ export class Map {
         const index = this.get(xi, yi)
 
         if (DEBUG_VISUAL) {
+          const [sx, sy] = this.coordsFromIndex(index)
           window.simulation.painting.gradientRectangle(
-            (index % this.rowLength) * SPACING,
-            Math.floor(index / this.rowLength) * SPACING,
+            sx,
+            sy,
             SPACING,
             SPACING,
             new Color(255, 0, 0),

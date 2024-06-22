@@ -1,5 +1,10 @@
 import { Color } from './color'
-import { CONSTANT_TIME, DEBUG_INFO, DEBUG_VISUAL } from './constants'
+import {
+  CONSTANT_TIME,
+  COUNT_START_CREATURES,
+  DEBUG_INFO,
+  DEBUG_VISUAL,
+} from './constants'
 import { Creature } from './creature'
 import { debug } from './log'
 import { vec2 } from './vec'
@@ -37,12 +42,12 @@ export class Simulation {
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
     this.creatures = []
-    this.creatures.push(Creature.random({ position: vec2(600, 600) }))
-    this.creatures.push(Creature.random({ position: vec2(500, 500) }))
+    // this.creatures.push(Creature.random({ position: vec2(600, 600) }))
+    // this.creatures.push(Creature.random({ position: vec2(500, 500) }))
 
-    // for (let i = 0; i < 1; i++) {
-    //   this.creatures.push(Creature.random())
-    // }
+    for (let i = 0; i < COUNT_START_CREATURES; i++) {
+      this.creatures.push(Creature.random())
+    }
 
     this.painting = new ImageBuffer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
