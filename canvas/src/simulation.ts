@@ -7,10 +7,10 @@ import {
 } from './constants'
 import { Creature } from './creature'
 import { debug } from './log'
-import { vec2 } from './vec'
+import { type Vector, vec2 } from './vec'
 import { ImageBuffer } from './imageBuffer'
 import { Debug } from './debug'
-import { Map, SPACING } from './map'
+import { Map } from './map'
 import { mod } from './math'
 import { PMF } from './random'
 
@@ -85,7 +85,7 @@ export class Simulation {
   }
 
   private draw() {
-    const map = new Map(this.canvas.width, this.canvas.height)
+    const map = new Map(this.canvas.width, this.canvas.height, this.creatures)
 
     // initialize canvas with white pixels, looks slightly better on borders
     this.painting.rectangle(
@@ -122,38 +122,9 @@ export class Simulation {
       debugEl.set('pixels', this.creatures.length)
     }
 
-    map.update(this.creatures)
+    map.update()
 
-    for (let ci = 0; ci < this.creatures.length; ci++) {
-      const c = this.creatures[ci]!
-      for (const cni of map.nearestNeighbors(
-        this.creatures[ci]!.position.vec,
-        200,
-      )) {
-        // skip itself
-        if (cni === ci) continue
-
-        const neighbor = this.creatures[cni]!
-        const [cx, cy] = neighbor.position.vec
-        const [x, y] = c.position.vec
-
-        const theta = Math.atan2(cy - y, cx - x)
-        // angle from 0 to 2pi
-        const d = Math.PI / 6
-        const i = mod(Math.round((theta - d) / d), 8)
-        // build a binomial pmf for going towards a certain point
-        const attraction: number[] = new Array(9).fill(0)
-        // offset by 1 because creatures can also stay in position
-        attraction[1 + mod(i - 2, 8)] = 1 / 16
-        attraction[1 + mod(i + 2, 8)] = 1 / 16
-        attraction[1 + mod(i - 1, 8)] = 4 / 16
-        attraction[1 + mod(i + 1, 8)] = 4 / 16
-        attraction[1 + i] = 6 / 16
-        const pmf = new PMF(attraction)
-        console.log('attraction', attraction, i)
-        c.updateWalk(pmf)
-      }
-    }
+    this.updateCreatureAttraction(map)
 
     for (const c of this.creatures) {
       // update character
@@ -197,10 +168,10 @@ export class Simulation {
     }
 
     if (DEBUG_VISUAL) {
-      for (let x = SPACING; x < cpainting.width; x += SPACING) {
+      for (let x = map.spacing; x < cpainting.width; x += map.spacing) {
         cpainting.verticalLine(0, cpainting.height, x, new Color(0, 0, 0))
       }
-      for (let y = SPACING; y < cpainting.height; y += SPACING) {
+      for (let y = map.spacing; y < cpainting.height; y += map.spacing) {
         cpainting.horizontalLine(0, cpainting.width, y, new Color(0, 0, 0))
       }
     }
@@ -217,6 +188,29 @@ export class Simulation {
           this.drawLoop(map)
         }
       })
+    }
+  }
+
+  private updateCreatureAttraction(map: Map) {
+    for (let ci = 0; ci < this.creatures.length; ci++) {
+      const c = this.creatures[ci]!
+      for (const [cni, dir, mag] of map.nearestNeighbors(ci, 200)) {
+        const theta = Math.atan2(dir.y, dir.x)
+        // angle from -pi to pi
+        const d = Math.PI / 6
+        const i = mod(Math.round((theta - d) / d), 8)
+        // build a binomial pmf for going towards a certain point
+        const attraction: number[] = new Array(9).fill(0)
+        // offset by 1 because creatures can also stay in position
+        attraction[1 + mod(i - 2, 8)] = 1 / 16
+        attraction[1 + mod(i + 2, 8)] = 1 / 16
+        attraction[1 + mod(i - 1, 8)] = 4 / 16
+        attraction[1 + mod(i + 1, 8)] = 4 / 16
+        attraction[1 + i] = 6 / 16
+        const pmf = new PMF(attraction)
+        console.log('attraction', attraction, i)
+        c.updateWalk(pmf)
+      }
     }
   }
 

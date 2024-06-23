@@ -1,9 +1,7 @@
 import { Color } from './color'
-import { DEBUG_INFO, DEBUG_VISUAL } from './constants'
+import { DEBUG_VISUAL } from './constants'
 import { type Creature } from './creature'
-
-// TODO: find a better spacing given width and height
-export const SPACING = 20
+import { vec2, type Vector } from './vec'
 
 /**
  * Map that uses spatial 'hashing' for efficiently dealing with creature interaction
@@ -14,8 +12,10 @@ export class Map {
   cellEntries: Int32Array
   queryIds: Int32Array
   querySize: number
+  spacing: number
 
   creaturesSize: number
+  creatures: Creature[]
 
   width: number
   height: number
@@ -23,12 +23,14 @@ export class Map {
   rowLength: number
   columnLength: number
 
-  constructor(width: number, height: number) {
+  constructor(width: number, height: number, creatures: Creature[]) {
     this.width = width
     this.height = height
+    // TODO: find a better spacing given width and height
+    this.spacing = 50
 
-    this.rowLength = Math.ceil(width / SPACING)
-    this.columnLength = Math.ceil(height / SPACING)
+    this.rowLength = Math.ceil(width / this.spacing)
+    this.columnLength = Math.ceil(height / this.spacing)
 
     const size = this.rowLength * this.columnLength
 
@@ -37,19 +39,20 @@ export class Map {
     this.queryIds = new Int32Array()
     this.querySize = 0
     this.creaturesSize = 0
+    this.creatures = creatures
   }
 
-  update(creatures: Creature[]) {
+  update() {
     // create new entries array with different size
-    if (creatures.length > this.creaturesSize) {
-      this.cellEntries = new Int32Array(creatures.length)
-      this.queryIds = new Int32Array(creatures.length)
+    if (this.creatures.length > this.creaturesSize) {
+      this.cellEntries = new Int32Array(this.creatures.length)
+      this.queryIds = new Int32Array(this.creatures.length)
     }
-    this.creaturesSize = creatures.length
+    this.creaturesSize = this.creatures.length
     this.cellStart.fill(0)
     this.cellEntries.fill(0)
 
-    for (const c of creatures) {
+    for (const c of this.creatures) {
       const i = this.getIndex(c.position.vec)
       this.cellStart[i]++
     }
@@ -60,8 +63,8 @@ export class Map {
       this.cellStart[i] = start
     }
 
-    for (let ci = 0; ci < creatures.length; ci++) {
-      const i = this.getIndex(creatures[ci]!.position.vec)
+    for (let ci = 0; ci < this.creatures.length; ci++) {
+      const i = this.getIndex(this.creatures[ci]!.position.vec)
       this.cellStart[i]--
       this.cellEntries[this.cellStart[i]!] = ci
     }
@@ -76,7 +79,10 @@ export class Map {
     if (y > this.height - 1) {
       y = y % this.height
     }
-    return Math.floor(x / SPACING) + Math.round(y / SPACING) * this.rowLength
+    return (
+      Math.floor(x / this.spacing) +
+      Math.round(y / this.spacing) * this.rowLength
+    )
   }
 
   /** get the index of a tile given row and column */
@@ -93,19 +99,88 @@ export class Map {
 
   coordsFromIndex(index: number): [number, number] {
     return [
-      (index % this.rowLength) * SPACING,
-      Math.floor(index / this.rowLength) * SPACING,
+      (index % this.rowLength) * this.spacing,
+      Math.floor(index / this.rowLength) * this.spacing,
     ]
   }
 
-  nearestNeighbors([x, y]: [number, number], distance: number): Iterator {
+  nearestNeighbors(
+    i: number,
+    distance: number,
+  ): Iterator<[number, Vector<2>, number]> {
+    const creatures = this.creatures
+    const c = this.creatures[i]!
+
+    const distanceSquared = distance ** 2
+    const maxDistance = distanceSquared + this.spacing * 2
+
+    const neigbors = this.nearestNeighborsFromGrid(i, distance)
+    const w = this.width
+    const h = this.height
+    return {
+      ids: neigbors.ids,
+      size: neigbors.size,
+      [Symbol.iterator]() {
+        let i = -1
+
+        const next: any = () => {
+          i++
+          if (i >= this.size) {
+            return {
+              value: undefined as unknown as [number, Vector<2>, number],
+              done: true,
+            }
+          }
+          const ni = this.ids[i]!
+          const cn = creatures[ni]!
+          const pn = cn.position
+
+          let dir = pn.clone().sub(c.position)
+          // update direction if direction to neighbor is wrapped around in space
+          // if neighbor is wrapped around in space get the distance to mirrored map
+          if (dir.mag2() > maxDistance) {
+            const qc = quadrant(w, h, c.position)
+            const qn = quadrant(w, h, cn.position)
+            // correct neighbor position to mirror the location
+            dir = pn
+              .clone()
+              .sub(getWrapCorrection(w, h, qc, qn))
+              .sub(c.position)
+          }
+
+          const dirMag = pn.mag2()
+
+          // if distance is bigger than range skip
+          if (dir.mag2() > maxDistance) {
+            return next()
+          }
+
+          return {
+            value: [this.ids[i]!, dir, dirMag],
+            done: false,
+          }
+        }
+
+        return {
+          next,
+        }
+      },
+    }
+  }
+
+  nearestNeighborsFromGrid(
+    i: number,
+    // [x, y]: [number, number],
+    distance: number,
+  ): Iterator<number> {
+    const [x, y] = this.creatures[i]!.position.vec
     this.querySize = 0
 
-    const x0 = Math.floor((x - distance) / SPACING)
-    const y0 = Math.floor((y - distance) / SPACING)
+    const x0 = Math.floor((x - distance) / this.spacing)
+    const y0 = Math.floor((y - distance) / this.spacing)
 
-    const x1 = Math.floor((x + distance) / SPACING)
-    const y1 = Math.floor((y + distance) / SPACING)
+    const x1 = Math.floor((x + distance) / this.spacing)
+    const y1 = Math.floor((y + distance) / this.spacing)
 
     if (DEBUG_VISUAL) {
       window.simulation.painting.gradientRectangle(
@@ -117,7 +192,6 @@ export class Map {
         0.1,
       )
     }
-    distance = distance ** 2
     for (let yi = y0; yi <= y1; yi++) {
       for (let xi = x0; xi <= x1; xi++) {
         const index = this.get(xi, yi)
@@ -127,8 +201,8 @@ export class Map {
           window.simulation.painting.gradientRectangle(
             sx,
             sy,
-            SPACING,
-            SPACING,
+            this.spacing,
+            this.spacing,
             new Color(255, 0, 0),
             0.1,
           )
@@ -140,6 +214,8 @@ export class Map {
           j++
         ) {
           const ci = this.cellEntries[j]!
+          // skip current cell
+          if (ci === i) continue
           this.queryIds[this.querySize] = ci
           this.querySize++
         }
@@ -173,13 +249,83 @@ export class Map {
 
 // TODO: Hash grid https://www.youtube.com/watch?v=D2M8jTtKi44
 
-interface Iterator {
+interface Iterator<V> {
   ids: Int32Array
   size: number
   [Symbol.iterator]: () => {
     next: () => {
-      value: number
+      value: V
       done: boolean
     }
   }
+}
+
+function getWrapCorrection(w: number, h: number, qc: number, qn: number) {
+  switch (qc) {
+    case 0:
+      switch (qn) {
+        case 1:
+          return vec2(-w, 0)
+        case 2:
+          return vec2(0, -h)
+        case 3:
+          return vec2(-w, -h)
+      }
+      throw Error(
+        "neighbor can't be in the same quadrant if direction is above distance check",
+      )
+    case 1:
+      switch (qn) {
+        case 0:
+          return vec2(w, 0)
+        case 2:
+          return vec2(w, -h)
+        case 3:
+          return vec2(0, -h)
+      }
+      throw Error(
+        "neighbor can't be in the same quadrant if direction is above distance check",
+      )
+    case 2:
+      switch (qn) {
+        case 0:
+          return vec2(0, h)
+        case 1:
+          return vec2(-w, h)
+        case 3:
+          return vec2(-w, 0)
+      }
+      throw Error(
+        "neighbor can't be in the same quadrant if direction is above distance check",
+      )
+    case 3:
+      switch (qn) {
+        case 0:
+          return vec2(w, h)
+        case 1:
+          return vec2(0, h)
+        case 2:
+          return vec2(w, 0)
+      }
+      throw Error(
+        "neighbor can't be in the same quadrant if direction is above distance check",
+      )
+  }
+  throw Error(
+    "neighbor can't be in the same quadrant if direction is above distance check",
+  )
+}
+
+/** get which quadrant a coord is returns 0 to 3 */
+function quadrant(width: number, height: number, p: Vector<2>) {
+  const [x, y] = p.vec
+  let q = 0
+  if (x > width / 2) {
+    q += 1
+  }
+  if (y > height / 2) {
+    q += 2
+  }
+
+  return q
 }

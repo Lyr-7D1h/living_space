@@ -36,6 +36,13 @@ export class Vector<N extends number> {
     return this
   }
 
+  sub(v: Vector<N>) {
+    for (let i = 0; i < this.vec.length; i++) {
+      this.vec[i] -= v.get(i)
+    }
+    return this
+  }
+
   mul(s: number) {
     for (let i = 0; i < this.vec.length; i++) {
       this.vec[i] *= s
@@ -48,6 +55,15 @@ export class Vector<N extends number> {
       this.vec[i] = Math.floor(this.vec[i]!)
     }
     return this
+  }
+
+  /** magnitude squared */
+  mag2() {
+    let m = 0
+    for (let i = 0; i < this.vec.length; i++) {
+      m += this.get(i) ** 2
+    }
+    return m
   }
 
   scale(s: number) {
