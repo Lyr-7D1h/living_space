@@ -26,7 +26,7 @@ export async function connect(addr: string): Promise<Connection> {
   })
 }
 
-export type Command =
+export type Message =
   | {
       type: 'init'
       connection_type: 'canvas' | 'controller'
@@ -55,16 +55,16 @@ export class Connection {
     this.socket = new WebSocket(addr)
   }
 
-  on(type: 'message', cb: (data: unknown) => void): void
+  on(type: 'message', cb: (data: Message) => void): void
   on(type: 'open' | 'error' | 'close', cb: (data: Event) => void): void
   on(
     type: 'message' | 'open' | 'error' | 'close',
-    cb: (event: Event) => void,
+    cb: (event: any) => void,
   ): void {
     switch (type) {
       case 'message':
         this.socket.addEventListener('message', (e) => {
-          cb(JSON.parse(e.data))
+          cb(JSON.parse(e.data as string))
         })
         break
       case 'open':
@@ -76,7 +76,7 @@ export class Connection {
     }
   }
 
-  send(cmd: Command) {
+  send(cmd: Message) {
     this.socket.send(JSON.stringify(cmd))
   }
 

@@ -1,10 +1,12 @@
 import { Color } from './color'
-import { type Command, connect } from './connection'
-import { SYNC_SERVER_URL } from './constants'
+import { connect } from './connection'
+import { CONSTANTS } from './constants'
 import { Creature } from './creature'
 import { Simulation } from './simulation'
 import { error } from './util'
 import { vec2 } from './vec'
+
+const { SYNC_SERVER_URL } = CONSTANTS
 
 const simulation = new Simulation()
 simulation.start()
@@ -45,7 +47,7 @@ async function sync() {
       height: simulation.height,
     })
     connection.on('message', (d) => {
-      const cmd = d as Command
+      const cmd = d
       switch (cmd.type) {
         case 'create': {
           const creature = new Creature({

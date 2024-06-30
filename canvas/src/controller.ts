@@ -1,17 +1,12 @@
 import iro from '@jaames/iro'
 import { type Connection, connect } from './connection'
 import { error } from './util'
+import { CONSTANTS } from './constants'
 
 const colorPicker = iro.ColorPicker('#color', {
   width: 300,
   color: '#29A4DA',
 })
-
-let URL = 'ws://localhost:7543'
-const host = new URLSearchParams(window.location.search).get('host')
-if (host !== null) {
-  URL = `ws://${host}:7543`
-}
 
 export function setupCreator(
   connection: Connection,
@@ -64,7 +59,7 @@ export function setupCreator(
       )
       .substring(1)
       .match(/.{2}/g)!
-      .map((x: string) => parseInt(x, 16))
+      .map((x: string) => parseInt(x, 16)) as [number, number, number]
 
     connection.send({
       type: 'create',
@@ -72,8 +67,11 @@ export function setupCreator(
       size: 2,
       color,
       characteristics: {
-        curiosity: parseInt(data.get('curiosity')! as string),
-        dominance: parseInt(data.get('dominance')! as string),
+        openness: parseInt(data.get('curiosity')! as string),
+        conscientiousness: 0,
+        extraversion: 0,
+        agreeableness: 0,
+        neuroticism: 0,
       },
     })
     submit.setAttribute('disabled', '')
@@ -86,11 +84,11 @@ export function setupCreator(
 }
 
 async function sync() {
-  let connection = await connect(URL).catch((e) => {
+  let connection = await connect(CONSTANTS.SYNC_SERVER_URL).catch((e) => {
     error(e)
   })
   while (typeof connection === 'undefined') {
-    connection = await connect(URL).catch((e) => {
+    connection = await connect(CONSTANTS.SYNC_SERVER_URL).catch((e) => {
       error(e)
     })
   }

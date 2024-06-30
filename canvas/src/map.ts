@@ -1,5 +1,5 @@
 import { Color } from './color'
-import { DEBUG_VISUAL } from './constants'
+import { CONSTANTS } from './constants'
 import { type Creature } from './creature'
 import { vec2, type Vector } from './vec'
 
@@ -181,7 +181,7 @@ export class Map {
     const x1 = Math.floor((x + distance) / this.spacing)
     const y1 = Math.floor((y + distance) / this.spacing)
 
-    if (DEBUG_VISUAL) {
+    if (CONSTANTS.DEBUG_VISUAL) {
       window.simulation.painting.gradientCircle(
         this.creatures[i]!.position,
         distance,
@@ -193,7 +193,7 @@ export class Map {
       for (let xi = x0; xi <= x1; xi++) {
         const index = this.get(xi, yi)
 
-        if (DEBUG_VISUAL) {
+        if (CONSTANTS.DEBUG_VISUAL) {
           const [sx, sy] = this.coordsFromIndex(index)
           window.simulation.painting.gradientRectangle(
             sx,

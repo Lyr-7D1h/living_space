@@ -1,11 +1,5 @@
 import { Color } from './color'
-import {
-  CONSTANT_TIME_S,
-  COUNT_START_CREATURES,
-  CREATURE_VIEWDISTANCE,
-  DEBUG_INFO,
-  DEBUG_VISUAL,
-} from './constants'
+import { CONSTANTS } from './constants'
 import { Creature } from './creature'
 import { debug } from './log'
 import { vec2 } from './vec'
@@ -21,7 +15,7 @@ function perf(cb: () => void) {
   const start = Date.now()
   cb()
   const d = Date.now() - start
-  if (DEBUG_INFO) {
+  if (CONSTANTS.DEBUG_INFO) {
     debugEl.set('fps', `${Math.round(1000 / d)}`)
     debugEl.set('delay', `${d}ms`)
   }
@@ -46,7 +40,7 @@ export class Simulation {
     this.creatures.push(Creature.random({ position: vec2(10, 50) }))
     this.creatures.push(Creature.random({ position: vec2(850, 50) }))
 
-    for (let i = 0; i < COUNT_START_CREATURES; i++) {
+    for (let i = 0; i < CONSTANTS.COUNT_START_CREATURES; i++) {
       this.creatures.push(Creature.random())
     }
 
@@ -94,15 +88,15 @@ export class Simulation {
       new Color(255, 255, 255),
     )
 
-    if (CONSTANT_TIME_S > 0) {
+    if (CONSTANTS.CONSTANT_TIME_S > 0) {
       setInterval(() => {
         this.drawLoop(map)
-      }, CONSTANT_TIME_S * 1000)
+      }, CONSTANTS.CONSTANT_TIME_S * 1000)
 
       return
     }
     requestAnimationFrame(() => {
-      if (DEBUG_INFO) {
+      if (CONSTANTS.DEBUG_INFO) {
         perf(() => {
           this.drawLoop(map)
         })
@@ -113,7 +107,7 @@ export class Simulation {
   }
 
   private drawLoop(map: Map) {
-    if (DEBUG_INFO) {
+    if (CONSTANTS.DEBUG_INFO) {
       debugEl.set('pixels', this.creatures.length)
     }
 
@@ -162,7 +156,7 @@ export class Simulation {
       cpainting.rectangle(p.x, p.y, c.size, c.size, c.color)
     }
 
-    if (DEBUG_VISUAL) {
+    if (CONSTANTS.DEBUG_VISUAL) {
       for (let x = map.spacing; x < cpainting.width; x += map.spacing) {
         cpainting.verticalLine(0, cpainting.height, x, new Color(0, 0, 0))
       }
@@ -173,9 +167,9 @@ export class Simulation {
 
     this.ctx.putImageData(cpainting.data, 0, 0)
 
-    if (CONSTANT_TIME_S === 0) {
+    if (CONSTANTS.CONSTANT_TIME_S === 0) {
       requestAnimationFrame(() => {
-        if (DEBUG_INFO) {
+        if (CONSTANTS.DEBUG_INFO) {
           perf(() => {
             this.drawLoop(map)
           })
@@ -192,13 +186,13 @@ export class Simulation {
       const c = this.creatures[ci]!
       for (const [_cni, dir, dirMag2] of map.nearestNeighbors(
         ci,
-        CREATURE_VIEWDISTANCE,
+        CONSTANTS.CREATURE_VIEWDISTANCE,
       )) {
         if (dirMag2 < c.size ** 2) {
           console.log('Collision')
         }
         const theta = Math.atan2(dir.y, dir.x)
-        if (DEBUG_VISUAL) {
+        if (CONSTANTS.DEBUG_VISUAL) {
           const [x0, y0] = c.position.vec
           const [x1, y1] = c.position
             .clone()

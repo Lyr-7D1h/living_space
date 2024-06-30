@@ -1,5 +1,3 @@
-// use p5 as ref https://p5js.org/reference/#/p5.Image
-
 import { type Color } from './color'
 import { type Vector } from './vec'
 

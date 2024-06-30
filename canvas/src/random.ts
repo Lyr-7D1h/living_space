@@ -1,4 +1,4 @@
-import { ASSERTS } from './constants'
+import { CONSTANTS } from './constants'
 import { roundTwoDec } from './util'
 
 /** https://en.wikipedia.org/wiki/Probability_mass_function */
@@ -14,7 +14,7 @@ export class PMF {
 
   /** create pmf from normalized list (all numbers add to 1)  */
   constructor(p: number[]) {
-    if (ASSERTS) {
+    if (CONSTANTS.ASSERTS) {
       const sum = p.reduce((a, b) => a + b)
       console.assert(sum === 1, sum)
     }
