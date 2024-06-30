@@ -48,7 +48,6 @@ export class CDF {
   /** Create a cdf from non normalized list of numbers */
   static fromWeights(values: number[]) {
     const sum = values.reduce((partialSum, a) => partialSum + a, 0)
-    console.log(sum)
     const p = values.map((v) => roundTwoDec(v / sum))
     return new CDF(p)
   }

@@ -81,7 +81,7 @@ export class Map {
     }
     return (
       Math.floor(x / this.spacing) +
-      Math.round(y / this.spacing) * this.rowLength
+      Math.floor(y / this.spacing) * this.rowLength
     )
   }
 
@@ -97,6 +97,7 @@ export class Map {
     return i + j * this.rowLength
   }
 
+  /** get top left corner of square used */
   coordsFromIndex(index: number): [number, number] {
     return [
       (index % this.rowLength) * this.spacing,
@@ -104,6 +105,7 @@ export class Map {
     ]
   }
 
+  /** Strictly all nearest neighbors within a distance */
   nearestNeighbors(
     i: number,
     distance: number,
@@ -111,8 +113,9 @@ export class Map {
     const creatures = this.creatures
     const c = this.creatures[i]!
 
+    // can at maximum be in the top right corner which is 2*diagonal of grid square ~ 3
     const distanceSquared = distance ** 2
-    const maxDistance = distanceSquared + this.spacing * 2
+    const maxDistance = distanceSquared + (this.spacing * 3) ** 2
 
     const neigbors = this.nearestNeighborsFromGrid(i, distance)
     const w = this.width
@@ -136,8 +139,7 @@ export class Map {
           const pn = cn.position
 
           let dir = pn.clone().sub(c.position)
-          // update direction if direction to neighbor is wrapped around in space
-          // if neighbor is wrapped around in space get the distance to mirrored map
+          // update direction of attraction if direction to neighbor is wrapped around in space
           if (dir.mag2() > maxDistance) {
             const qc = quadrant(w, h, c.position)
             const qn = quadrant(w, h, cn.position)
@@ -151,7 +153,7 @@ export class Map {
           const dirMag = pn.mag2()
 
           // if distance is bigger than range skip
-          if (dir.mag2() > maxDistance) {
+          if (dir.mag2() > distanceSquared) {
             return next()
           }
 
@@ -168,11 +170,8 @@ export class Map {
     }
   }
 
-  nearestNeighborsFromGrid(
-    i: number,
-    // [x, y]: [number, number],
-    distance: number,
-  ): Iterator<number> {
+  /** all nearest neighbor within the spacing of the grid (might be outside distance), returns an iterator with all the ids */
+  nearestNeighborsFromGrid(i: number, distance: number): Iterator<number> {
     const [x, y] = this.creatures[i]!.position.vec
     this.querySize = 0
 
@@ -183,11 +182,9 @@ export class Map {
     const y1 = Math.floor((y + distance) / this.spacing)
 
     if (DEBUG_VISUAL) {
-      window.simulation.painting.gradientRectangle(
-        x - distance,
-        y - distance,
-        distance * 2,
-        distance * 2,
+      window.simulation.painting.gradientCircle(
+        this.creatures[i]!.position,
+        distance,
         new Color(0, 255, 0),
         0.1,
       )
@@ -246,8 +243,6 @@ export class Map {
     }
   }
 }
-
-// TODO: Hash grid https://www.youtube.com/watch?v=D2M8jTtKi44
 
 interface Iterator<V> {
   ids: Int32Array

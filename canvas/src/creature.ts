@@ -9,6 +9,15 @@ export interface Characteristics {
   friendliness: number
 }
 
+/** https://en.wikipedia.org/wiki/Big_Five_personality_traits */
+// export interface Characteristics {
+//   openness: number
+//   conscientiousness: number
+//   extraversion: number
+//   agreeableness: number
+//   neuroticism: number
+// }
+
 export type CreatureArgs = {
   position: Vector<2>
   size: number
@@ -94,12 +103,15 @@ export class Creature {
 
   /** update the way this creature walks */
   updateWalk(pmf: PMF) {
-    console.log('walk update')
-    console.log(this.walk.p)
+    // console.log('walk update')
+    // console.log(this.walk.p)
     this.walk = this.preference.clone()
     this.walk.add(pmf)
-    console.log(this.walk.p)
+    // console.log(this.walk.p)
   }
+
+  /** returns a new creature or null if they don't like eachother */
+  procreate(creature: Creature): Creature | null {}
 
   /** take a step into a direction based on characteristics */
   step() {

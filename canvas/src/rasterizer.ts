@@ -4,7 +4,7 @@ import { type Color } from './color'
 import { type Vector } from './vec'
 
 // https://github.dev/ronikaufman/poetical_computer_vision/blob/main/days01-10/day01/day01.pde
-export class ImageBuffer {
+export class Rasterizer {
   data: ImageData
   buffer: Uint8ClampedArray
 
@@ -14,7 +14,7 @@ export class ImageBuffer {
   }
 
   clone() {
-    return new ImageBuffer(
+    return new Rasterizer(
       new ImageData(
         new Uint8ClampedArray(this.data.data),
         this.data.width,
@@ -179,22 +179,47 @@ export class ImageBuffer {
   }
 
   horizontalLine(x: number, dx: number, y: number, c: Color) {
-    // const o = y * this.width * 4
-    // for (let i = x * 4 + o; i < (x + dx) * 4 + o; i++) {
-    //   this.buffer[i] += c.c[i % 4]!
-    // }
     for (let xi = x; xi < x + dx; xi++) {
       this.set(xi, y, c)
-      // this.buffer[i] += c.c[i % 4]!
     }
   }
 
   verticalLine(y: number, dy: number, x: number, c: Color) {
-    // const o = x * 4
-    // const width = this.width
     for (let yi = y; yi < y + dy; yi++) {
       this.set(x, yi, c)
-      // this.buffer[i] += c.c[i % 4]!
+    }
+  }
+
+  /** https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm */
+  line(x0: number, y0: number, x1: number, y1: number, c: Color) {
+    x0 = Math.round(x0)
+    y0 = Math.round(y0)
+    x1 = Math.round(x1)
+    y1 = Math.round(y1)
+    const dx = Math.abs(x1 - x0)
+    const sx = x0 < x1 ? 1 : -1
+    const dy = -Math.abs(y1 - y0)
+    const sy = y0 < y1 ? 1 : -1
+    let e = dx + dy
+
+    while (true) {
+      if (x0 > 100000) {
+        throw Error(
+          'size of x0 grew unrealisticly big, coordinates given are most likely wrong',
+        )
+      }
+      this.set(x0, y0, c)
+      if (x0 === x1 && y0 === y1) break
+      const e2 = 2 * e
+      if (e2 >= dy) {
+        if (x0 === x1) break
+        e += dy
+        x0 += sx
+      } else if (e2 <= dx) {
+        if (y0 === y1) break
+        e += dx
+        y0 += sy
+      }
     }
   }
 
