@@ -53,7 +53,6 @@ export class Simulation {
     this.painting = new Rasterizer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
     )
-    this.ctx.putImageData(this.painting.data, 0, 0)
   }
 
   get width() {

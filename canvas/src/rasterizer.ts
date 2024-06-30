@@ -54,7 +54,6 @@ export class Rasterizer {
       for (let d = x * 4; d <= (x + dx) * 4; d++) {
         const i = o + d
         const diff = v[d % 4]! - this.buffer[i]!
-        // console.log(Math.sign(diff) * Math.abs(diff) * percentage)
         this.buffer[i] += Math.sign(diff) * Math.abs(diff) * percentage
       }
     }

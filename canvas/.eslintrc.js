@@ -21,6 +21,7 @@ module.exports = {
   },
   rules: {
     'space-before-function-paren': 'off',
+    '@typescript-eslint/no-unused-vars': 'warn',
     '@typescript-eslint/space-before-function-paren': 'off',
     '@typescript-eslint/no-unsafe-argument': 'warn',
     '@typescript-eslint/no-non-null-assertion': 'off',
