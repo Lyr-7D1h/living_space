@@ -41,7 +41,7 @@ export type Message =
       position: [number, number]
       size: number
       color: [number, number, number]
-      characteristics: Personality
+      personality: Personality
     }
 
 export class Connection {

@@ -28,7 +28,7 @@ pub enum Command {
         position: Vec<u32>,
         size: u32,
         color: Vec<u32>,
-        characteristics: Characteristics,
+        personality: Personality,
     },
 }
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -40,10 +40,12 @@ pub enum ConnectionType {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "snake_case")]
-pub struct Characteristics {
-    curiosity: u32,
-    dominance: u32,
-    // friendliness: u32,
+pub struct Personality {
+    openness: u32,
+    conscientiousness: u32,
+    extraversion: u32,
+    agreeableness: u32,
+    neuroticism: u32,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

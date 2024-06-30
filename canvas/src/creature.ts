@@ -1,7 +1,7 @@
 import { Color } from './color'
 import { CDF, type PMF } from './random'
 import { roundTwoDec } from './util'
-import { type Vector, vec2 } from './vec'
+import { type Vector, vec2, vec } from './vec'
 
 /** https://en.wikipedia.org/wiki/Big_Five_personality_traits */
 export interface Personality {
@@ -24,7 +24,7 @@ export type CreatureArgs = {
       speed: number
     }
   | {
-      characteristics: Personality
+      personality: Personality
     }
 )
 
@@ -59,10 +59,12 @@ export class Creature {
       position: vec2(x(), y()),
       color: new Color(c(), c(), c()),
       size: 2,
-      characteristics: {
-        curiosity: Math.random(),
-        dominance: Math.random(),
-        // friendliness: Math.random(),
+      personality: {
+        openness: Math.random(),
+        conscientiousness: Math.random(),
+        extraversion: Math.random(),
+        agreeableness: Math.random(),
+        neuroticism: Math.random(),
       },
       ...args,
     })
@@ -78,12 +80,13 @@ export class Creature {
       this.coloringPercentage = args.coloringPercentage
       this.coloringSpread = args.coloringSpread
     } else {
-      const c = args.characteristics
+      const c = args.personality
+
+      const sum = vec(Object.values(args.personality)).sum()
+
       // get all chars as a percentage of total
-      const sum = c.curiosity + c.dominance // + c.friendliness
-      const curiosity = c.curiosity / sum
-      const dominance = c.dominance / sum
-      // const friendliness = c.friendliness / sum
+      const curiosity = 1
+      const dominance = 1
 
       this.speed = 1 + Math.round(4 * curiosity)
       this.coloringSpread = 10 - Math.round(3 * dominance)
@@ -105,9 +108,12 @@ export class Creature {
   }
 
   /** returns a new creature or null if they don't like eachother */
-  procreate(creature: Creature): Creature | null {}
+  procreate(creature: Creature): Creature | null {
+    // TODO: procreation
+    return null
+  }
 
-  /** take a step into a direction based on characteristics */
+  /** take a step into a direction based on behavioral walk */
   step() {
     const i = this.walk.draw()
     const m = directions[i]!

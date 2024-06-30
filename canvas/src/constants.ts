@@ -1,6 +1,5 @@
 export const CONSTANTS = {
   SYNC_SERVER_URL: 'ws://localhost:7543',
-  DEBUG: false,
   DEBUG_INFO: true,
   ASSERTS: false,
   DEBUG_VISUAL: false,

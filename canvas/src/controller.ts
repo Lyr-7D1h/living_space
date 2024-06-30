@@ -66,7 +66,7 @@ export function setupCreator(
       position: [scale(position[0]), scale(position[1])],
       size: 2,
       color,
-      characteristics: {
+      personality: {
         openness: parseInt(data.get('curiosity')! as string),
         conscientiousness: 0,
         extraversion: 0,

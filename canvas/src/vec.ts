@@ -129,3 +129,6 @@ export class Vector<N extends number> {
 export function vec2(x: number, y: number) {
   return new Vector<2>(x, y)
 }
+export function vec<N extends number>(values: NArray<N>) {
+  return new Vector<N>(...values)
+}

@@ -54,7 +54,7 @@ async function sync() {
             position: vec2(...cmd.position),
             size: cmd.size,
             color: new Color(cmd.color),
-            characteristics: cmd.characteristics,
+            personality: cmd.personality,
           })
           simulation.addCreature(creature)
           break
