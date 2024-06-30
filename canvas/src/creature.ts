@@ -3,20 +3,14 @@ import { CDF, type PMF } from './random'
 import { roundTwoDec } from './util'
 import { type Vector, vec2 } from './vec'
 
-export interface Characteristics {
-  curiosity: number
-  dominance: number
-  // friendliness: number
-}
-
 /** https://en.wikipedia.org/wiki/Big_Five_personality_traits */
-// export interface Characteristics {
-//   openness: number
-//   conscientiousness: number
-//   extraversion: number
-//   agreeableness: number
-//   neuroticism: number
-// }
+export interface Personality {
+  openness: number
+  conscientiousness: number
+  extraversion: number
+  agreeableness: number
+  neuroticism: number
+}
 
 export type CreatureArgs = {
   position: Vector<2>
@@ -30,7 +24,7 @@ export type CreatureArgs = {
       speed: number
     }
   | {
-      characteristics: Characteristics
+      characteristics: Personality
     }
 )
 

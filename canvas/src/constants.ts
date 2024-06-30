@@ -5,4 +5,4 @@ export const ASSERTS = false
 export const DEBUG_VISUAL = true
 export const CONSTANT_TIME_S: number = 0
 export const COUNT_START_CREATURES = 0
-export const CREATURE_VIEWDISTANCE = 100
+export const CREATURE_VIEWDISTANCE = 200

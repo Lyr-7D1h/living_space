@@ -43,8 +43,8 @@ export class Simulation {
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
     this.creatures = []
-    this.creatures.push(Creature.random({ position: vec2(151, 425) }))
-    this.creatures.push(Creature.random({ position: vec2(277, 557) }))
+    this.creatures.push(Creature.random({ position: vec2(139, 117) }))
+    this.creatures.push(Creature.random({ position: vec2(349, 260) }))
 
     for (let i = 0; i < COUNT_START_CREATURES; i++) {
       this.creatures.push(Creature.random())
@@ -53,8 +53,6 @@ export class Simulation {
     this.painting = new Rasterizer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
     )
-    this.painting.gradientCircle(vec2(151, 425), 10, new Color(255, 0, 0), 1)
-    this.painting.gradientCircle(vec2(277, 557), 10, new Color(255, 0, 0), 1)
     this.ctx.putImageData(this.painting.data, 0, 0)
   }
 
@@ -198,7 +196,7 @@ export class Simulation {
         CREATURE_VIEWDISTANCE,
       )) {
         if (dirMag2 < c.size ** 2) {
-          // console.log('Collision')
+          console.log('Collision')
         }
         const theta = Math.atan2(dir.y, dir.x)
         if (DEBUG_VISUAL) {

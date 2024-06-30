@@ -1,4 +1,4 @@
-import { type Characteristics } from './creature'
+import { type Personality } from './creature'
 
 /** Connect to socket in a blocking manner erroring in case of timeout or error */
 export async function connect(addr: string): Promise<Connection> {
@@ -41,7 +41,7 @@ export type Command =
       position: [number, number]
       size: number
       color: [number, number, number]
-      characteristics: Characteristics
+      characteristics: Personality
     }
 
 export class Connection {
