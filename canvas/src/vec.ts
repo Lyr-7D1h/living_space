@@ -1,3 +1,5 @@
+import { roundTwoDec } from './util'
+
 type NArray<N extends number> = N extends 1
   ? [number]
   : N extends 2
@@ -10,6 +12,7 @@ type Y<N extends number> = N extends 3
     ? number
     : undefined
 type Z<N extends number> = N extends 3 ? number : undefined
+// FIXME: make me not an object but just an array with util function and typing
 export class Vector<N extends number> {
   vec: NArray<N>
   constructor(...vec: NArray<N>) {
@@ -35,6 +38,40 @@ export class Vector<N extends number> {
     return this
   }
 
+  /** normalize vector */
+  norm() {
+    const mag2 = this.mag2()
+    if (mag2 === 0) return this
+    // TODO: use https://en.wikipedia.org/wiki/Fast_inverse_square_root
+    const a = 1 / Math.sqrt(mag2)
+    if (a === 0) return this
+    for (let i = 0; i < this.vec.length; i++) {
+      this.vec[i] *= a
+    }
+    return this
+  }
+
+  sub(v: Vector<N>) {
+    for (let i = 0; i < this.vec.length; i++) {
+      this.vec[i] -= v.get(i)
+    }
+    return this
+  }
+
+  roundTwoDec() {
+    for (let i = 0; i < this.vec.length; i++) {
+      this.vec[i] = roundTwoDec(this.vec[i]!)
+    }
+    return this
+  }
+
+  round() {
+    for (let i = 0; i < this.vec.length; i++) {
+      this.vec[i] = Math.round(this.vec[i]!)
+    }
+    return this
+  }
+
   mul(s: number) {
     for (let i = 0; i < this.vec.length; i++) {
       this.vec[i] *= s
@@ -54,6 +91,23 @@ export class Vector<N extends number> {
       this.vec[i] *= s
     }
     return this
+  }
+
+  /** magnitude squared */
+  mag2(): number {
+    let m = 0
+    for (let i = 0; i < this.vec.length; i++) {
+      m += this.get(i) ** 2
+    }
+    return m
+  }
+
+  sum(): number {
+    let a = 0
+    for (let i = 0; i < this.vec.length; i++) {
+      a += this.get(i)
+    }
+    return a
   }
 
   get x() {

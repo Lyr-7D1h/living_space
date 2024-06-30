@@ -1,10 +1,19 @@
 import { Color } from './color'
-import { DEBUG } from './constants'
+import {
+  CONSTANT_TIME_S,
+  COUNT_START_CREATURES,
+  CREATURE_VIEWDISTANCE,
+  DEBUG_INFO,
+  DEBUG_VISUAL,
+} from './constants'
 import { Creature } from './creature'
 import { debug } from './log'
 import { vec2 } from './vec'
-import { ImageBuffer } from './data'
+import { Rasterizer } from './rasterizer'
 import { Debug } from './debug'
+import { Map } from './map'
+import { mod } from './math'
+import { PMF } from './random'
 
 const debugEl = new Debug()
 
@@ -12,7 +21,7 @@ function perf(cb: () => void) {
   const start = Date.now()
   cb()
   const d = Date.now() - start
-  if (DEBUG) {
+  if (DEBUG_INFO) {
     debugEl.set('fps', `${Math.round(1000 / d)}`)
     debugEl.set('delay', `${d}ms`)
   }
@@ -22,6 +31,7 @@ function perf(cb: () => void) {
 export class Simulation {
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
+  painting: Rasterizer
   creatures: Creature[]
 
   constructor() {
@@ -33,6 +43,19 @@ export class Simulation {
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
     this.creatures = []
+    this.creatures.push(Creature.random({ position: vec2(151, 425) }))
+    this.creatures.push(Creature.random({ position: vec2(277, 557) }))
+
+    for (let i = 0; i < COUNT_START_CREATURES; i++) {
+      this.creatures.push(Creature.random())
+    }
+
+    this.painting = new Rasterizer(
+      this.ctx.createImageData(this.canvas.width, this.canvas.height),
+    )
+    this.painting.gradientCircle(vec2(151, 425), 10, new Color(255, 0, 0), 1)
+    this.painting.gradientCircle(vec2(277, 557), 10, new Color(255, 0, 0), 1)
+    this.ctx.putImageData(this.painting.data, 0, 0)
   }
 
   get width() {
@@ -45,7 +68,6 @@ export class Simulation {
 
   start() {
     this.setup()
-    // this.grid();
 
     this.draw()
   }
@@ -56,9 +78,6 @@ export class Simulation {
       (event) => {
         const x = event.pageX
         const y = event.pageY
-        const r = () => Math.floor(Math.random() * 255)
-        const color = new Color(r(), r(), r())
-        debug(`new creature at ${x} ${y} with ${color.rgb()}`)
 
         this.addCreature(Creature.random({ position: vec2(x, y) }))
       },
@@ -67,18 +86,26 @@ export class Simulation {
   }
 
   private draw() {
-    // for (let i = 0; i < 1000; i++) {
-    //   this.creatures.push(Creature.random())
-    // }
+    const map = new Map(this.canvas.width, this.canvas.height, this.creatures)
 
-    const map = new ImageBuffer(
-      this.ctx.createImageData(this.canvas.width, this.canvas.height),
-    )
     // initialize canvas with white pixels, looks slightly better on borders
-    map.fill(0, 0, map.width, map.height, new Color(255, 255, 255))
+    this.painting.rectangle(
+      0,
+      0,
+      this.painting.width,
+      this.painting.height,
+      new Color(255, 255, 255),
+    )
 
+    if (CONSTANT_TIME_S > 0) {
+      setInterval(() => {
+        this.drawLoop(map)
+      }, CONSTANT_TIME_S * 1000)
+
+      return
+    }
     requestAnimationFrame(() => {
-      if (DEBUG) {
+      if (DEBUG_INFO) {
         perf(() => {
           this.drawLoop(map)
         })
@@ -88,11 +115,15 @@ export class Simulation {
     })
   }
 
-  private drawLoop(map: ImageBuffer) {
-    if (DEBUG) {
+  private drawLoop(map: Map) {
+    if (DEBUG_INFO) {
       debugEl.set('pixels', this.creatures.length)
     }
-    // this.ctx.putImageData(map.data, 0, 0)
+
+    map.update()
+
+    this.updateCreatureAttraction(map)
+
     for (const c of this.creatures) {
       // update character
       c.step()
@@ -109,7 +140,7 @@ export class Simulation {
       const c = this.creatures[i]!
       const p = c.position
       // map.gradientCircle(p, 10, c.color, c.coloringPercentage)
-      map.fadingGradientCircle(
+      this.painting.fadingGradientCircle(
         p,
         c.coloringSpread,
         c.color,
@@ -124,24 +155,75 @@ export class Simulation {
       //   COLORING_PERCENT,
       // )
     }
-    const cmap = map.clone()
 
+    const cpainting = this.painting.clone()
+
+    // draw creatures
     for (let i = 0; i < this.creatures.length; i++) {
       const c = this.creatures[i]!
       const p = c.position
-      cmap.fill(p.x, p.y, c.size, c.size, c.color)
+      cpainting.rectangle(p.x, p.y, c.size, c.size, c.color)
     }
-    this.ctx.putImageData(cmap.data, 0, 0)
 
-    requestAnimationFrame(() => {
-      if (DEBUG) {
-        perf(() => {
-          this.drawLoop(map)
-        })
-      } else {
-        this.drawLoop(map)
+    if (DEBUG_VISUAL) {
+      for (let x = map.spacing; x < cpainting.width; x += map.spacing) {
+        cpainting.verticalLine(0, cpainting.height, x, new Color(0, 0, 0))
       }
-    })
+      for (let y = map.spacing; y < cpainting.height; y += map.spacing) {
+        cpainting.horizontalLine(0, cpainting.width, y, new Color(0, 0, 0))
+      }
+    }
+
+    this.ctx.putImageData(cpainting.data, 0, 0)
+
+    if (CONSTANT_TIME_S === 0) {
+      requestAnimationFrame(() => {
+        if (DEBUG_INFO) {
+          perf(() => {
+            this.drawLoop(map)
+          })
+        } else {
+          this.drawLoop(map)
+        }
+      })
+    }
+  }
+
+  /** for each creature check for neirest neighbors and update walking direction */
+  private updateCreatureAttraction(map: Map) {
+    for (let ci = 0; ci < this.creatures.length; ci++) {
+      const c = this.creatures[ci]!
+      for (const [_cni, dir, dirMag2] of map.nearestNeighbors(
+        ci,
+        CREATURE_VIEWDISTANCE,
+      )) {
+        if (dirMag2 < c.size ** 2) {
+          // console.log('Collision')
+        }
+        const theta = Math.atan2(dir.y, dir.x)
+        if (DEBUG_VISUAL) {
+          const [x0, y0] = c.position.vec
+          const [x1, y1] = c.position
+            .clone()
+            .add(dir.norm().scale(30).round()).vec
+          // console.log(y0, y1, dir.norm().scale(30).round().vec)
+          this.painting.line(x0, y0, x1, y1, new Color(0, 255, 0))
+        }
+        // angle from -pi to pi
+        const d = Math.PI / 6
+        const i = mod(Math.round((theta - d) / d), 8)
+        // build a binomial pmf for going towards a certain point
+        const attraction: number[] = new Array(9).fill(0)
+        // offset by 1 because creatures can also stay in position
+        attraction[1 + mod(i - 2, 8)] = 1 / 16
+        attraction[1 + mod(i + 2, 8)] = 1 / 16
+        attraction[1 + mod(i - 1, 8)] = 4 / 16
+        attraction[1 + mod(i + 1, 8)] = 4 / 16
+        attraction[1 + i] = 6 / 16
+        const pmf = new PMF(attraction)
+        c.updateWalk(pmf)
+      }
+    }
   }
 
   addCreature(creature: Creature) {

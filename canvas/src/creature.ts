@@ -1,5 +1,5 @@
 import { Color } from './color'
-import { CDF } from './random'
+import { CDF, type PMF } from './random'
 import { roundTwoDec } from './util'
 import { type Vector, vec2 } from './vec'
 
@@ -8,6 +8,15 @@ export interface Characteristics {
   dominance: number
   // friendliness: number
 }
+
+/** https://en.wikipedia.org/wiki/Big_Five_personality_traits */
+// export interface Characteristics {
+//   openness: number
+//   conscientiousness: number
+//   extraversion: number
+//   agreeableness: number
+//   neuroticism: number
+// }
 
 export type CreatureArgs = {
   position: Vector<2>
@@ -25,16 +34,16 @@ export type CreatureArgs = {
     }
 )
 
-export const neighbors = [
-  vec2(-1, -1),
-  vec2(-1, 1),
-  vec2(0, -1),
-  vec2(-1, 0),
+const directions = [
   vec2(0, 0),
   vec2(1, 0),
-  vec2(0, 1),
-  vec2(1, -1),
   vec2(1, 1),
+  vec2(0, 1),
+  vec2(-1, 1),
+  vec2(-1, 0),
+  vec2(-1, -1),
+  vec2(0, -1),
+  vec2(1, -1),
 ]
 
 export class Creature {
@@ -44,7 +53,9 @@ export class Creature {
   coloringPercentage: number
   coloringSpread: number
   speed: number
+
   preference: CDF
+  private walk: CDF
 
   static random(args?: Partial<CreatureArgs>) {
     const x = () => Math.floor(Math.random() * window.innerWidth)
@@ -81,20 +92,31 @@ export class Creature {
       // const friendliness = c.friendliness / sum
 
       this.speed = 1 + Math.round(4 * curiosity)
-      this.coloringSpread = 10 - Math.round(4 * dominance)
+      this.coloringSpread = 10 - Math.round(3 * dominance)
       this.coloringPercentage = roundTwoDec(0.015 + 0.05 * dominance)
-      this.preference = new CDF(
-        ...Array.from({ length: 9 }, (_) => Math.floor(Math.random() * 50)),
+      this.preference = CDF.fromWeights(
+        Array.from({ length: 9 }, (_) => Math.random()),
       )
     }
+    this.walk = this.preference.clone()
   }
+
+  /** update the way this creature walks */
+  updateWalk(pmf: PMF) {
+    // console.log('walk update')
+    // console.log(this.walk.p)
+    this.walk = this.preference.clone()
+    this.walk.add(pmf)
+    // console.log(this.walk.p)
+  }
+
+  /** returns a new creature or null if they don't like eachother */
+  procreate(creature: Creature): Creature | null {}
 
   /** take a step into a direction based on characteristics */
   step() {
-    // const probs = [80, 20, 0, 20, 20, 20, 20, 0, 20]
-    // probs[this.prev] = 0
-    const i = this.preference.draw()
-    const m = neighbors[i]!
+    const i = this.walk.draw()
+    const m = directions[i]!
     this.position.add(m.clone().scale(this.speed))
   }
 }

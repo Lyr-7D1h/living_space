@@ -46,5 +46,7 @@ export function error(msg: any, permanent?: boolean): HTMLElement {
 }
 
 export function roundTwoDec(n: number) {
-  return Math.round((n + Number.EPSILON) * 100) / 100
+  return parseFloat(n.toFixed(2))
+  // gives very small decimal numbers when adding numbers
+  // return Math.round((n + Number.EPSILON) * 100) / 100
 }

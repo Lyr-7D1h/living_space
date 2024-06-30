@@ -1,64 +1,102 @@
+import { ASSERTS } from './constants'
 import { roundTwoDec } from './util'
 
+/** https://en.wikipedia.org/wiki/Probability_mass_function */
 export class PMF {
-  f: number[]
+  p: number[]
 
-  constructor(...values: number[]) {
+  /** create pmf from non normalized list of numbers */
+  fromWeights(values: number[]) {
     const sum = values.reduce((partialSum, a) => partialSum + a, 0)
-    this.f = values.map((v) => v / sum)
-    console.log(this.f)
+    const f = values.map((v) => v / sum)
+    return new PMF(f)
   }
 
-  set(index: number, value: number) {
-    this.f[index] = value
-    // renormalize
-    const sum = this.f.reduce((partialSum, a) => partialSum + a, 0)
-    this.f = this.f.map((v) => v / sum)
+  /** create pmf from normalized list (all numbers add to 1)  */
+  constructor(p: number[]) {
+    if (ASSERTS) {
+      const sum = p.reduce((a, b) => a + b)
+      console.assert(sum === 1, sum)
+    }
+    this.p = p
   }
 
   [Symbol.iterator]() {
-    return this.f[Symbol.iterator]()
+    return this.p[Symbol.iterator]()
   }
 
   cdf() {
-    return CDF.fromPdf(this)
+    return CDF.fromPMF(this)
   }
 }
 
+/** https://en.wikipedia.org/wiki/Cumulative_distribution_function */
 export class CDF {
+  p: number[]
   f: number[]
 
-  static fromPdf(pmf: PMF) {
-    let a = 0
-
-    const cdf = pmf.f.map((p) => {
-      a += p
-      return a
-    })
-
-    // account for floating point errors
-    cdf[cdf.length - 1] = 1
-
-    return new CDF(...cdf)
+  static fromPMF(pmf: PMF) {
+    return new CDF(pmf.p)
   }
 
-  /** create cdf from numbers going up from 0 to 1 */
-  constructor(...values: number[]) {
+  static uniform(length: number) {
+    const p: number[] = new Array(length).fill(roundTwoDec(1 / length))
+
+    return new CDF(p)
+  }
+
+  /** Create a cdf from non normalized list of numbers */
+  static fromWeights(values: number[]) {
     const sum = values.reduce((partialSum, a) => partialSum + a, 0)
-    let f = values.map((v) => v / sum)
+    const p = values.map((v) => roundTwoDec(v / sum))
+    return new CDF(p)
+  }
+
+  /** create cdf from probabilities going up from 0 to 1 */
+  constructor(p: number[]) {
+    this.p = p
+    this.f = this.fromProbabilities(p)
+  }
+
+  private fromProbabilities(p: number[]) {
     let a = 0
-    f = f.map((p) => {
+    const f = p.map((p) => {
       a += p
-      if (a > 1) a = 1
+      if (a > 1) return 1
       return roundTwoDec(a)
     })
+
     // account for floating point errors
     f[f.length - 1] = 1
-    this.f = f
+
+    return f
   }
 
   [Symbol.iterator]() {
     return this.f[Symbol.iterator]()
+  }
+
+  clone() {
+    return new CDF([...this.p])
+  }
+
+  updateWeight(index: number, p: number) {
+    this.p[index] = p
+    const cdf = CDF.fromWeights(this.p)
+    this.f = cdf.f
+    this.p = cdf.p
+  }
+
+  add(pmf: PMF): void
+  add(cdf: CDF): void
+  add(fun: PMF | CDF) {
+    const p = fun.p
+
+    for (let i = 0; i < this.p.length; i++) {
+      this.p[i] = roundTwoDec((this.p[i]! + p[i]!) / 2)
+    }
+
+    this.f = this.fromProbabilities(this.p)
   }
 
   /** draw a random number from pmf */
