@@ -43,8 +43,8 @@ export class Simulation {
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
     this.creatures = []
-    this.creatures.push(Creature.random({ position: vec2(139, 117) }))
-    this.creatures.push(Creature.random({ position: vec2(349, 260) }))
+    this.creatures.push(Creature.random({ position: vec2(10, 50) }))
+    this.creatures.push(Creature.random({ position: vec2(850, 50) }))
 
     for (let i = 0; i < COUNT_START_CREATURES; i++) {
       this.creatures.push(Creature.random())

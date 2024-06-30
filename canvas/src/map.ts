@@ -115,7 +115,7 @@ export class Map {
 
     // can at maximum be in the top right corner which is 2*diagonal of grid square ~ 3
     const distanceSquared = distance ** 2
-    const maxDistance = (distanceSquared + this.spacing * 3) ** 2
+    const maxDistance = (distance + this.spacing * 3) ** 2
 
     const neigbors = this.nearestNeighborsFromGrid(i, distance)
     const w = this.width
@@ -143,17 +143,10 @@ export class Map {
           if (dir.mag2() > maxDistance) {
             const qc = quadrant(w, h, c.position)
             const qn = quadrant(w, h, cn.position)
-            console.log(
-              dir.mag2(),
-              maxDistance,
-              pn.vec,
-              c.position.vec,
-              dir.vec,
-            )
             // correct neighbor position to mirror the location
             dir = pn
               .clone()
-              .sub(getWrapCorrection(w, h, qc, qn))
+              .add(getWrapCorrection(w, h, qc, qn))
               .sub(c.position)
           }
 
