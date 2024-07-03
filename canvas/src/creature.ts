@@ -1,14 +1,19 @@
 import { Color } from './color'
 import { CDF, type PMF } from './random'
 import { roundTwoDec } from './util'
-import { type Vector, vec2, vec } from './vec'
+import { Vector, vec } from './vec'
 
 /** https://en.wikipedia.org/wiki/Big_Five_personality_traits */
 export interface Personality {
+  /** curious - cautious */
   openness: number
+  /** organized - careless */
   conscientiousness: number
+  /** energetic - reserved */
   extraversion: number
+  /** compassionate - judgemental */
   agreeableness: number
+  /** nervous - confident */
   neuroticism: number
 }
 
@@ -22,6 +27,7 @@ export type CreatureArgs = {
       coloringSpread: number
       preference: CDF
       speed: number
+      attraction: number
     }
   | {
       personality: Personality
@@ -29,15 +35,15 @@ export type CreatureArgs = {
 )
 
 const directions = [
-  vec2(0, 0),
-  vec2(1, 0),
-  vec2(1, 1),
-  vec2(0, 1),
-  vec2(-1, 1),
-  vec2(-1, 0),
-  vec2(-1, -1),
-  vec2(0, -1),
-  vec2(1, -1),
+  vec(0, 0),
+  vec(1, 0),
+  vec(1, 1),
+  vec(0, 1),
+  vec(-1, 1),
+  vec(-1, 0),
+  vec(-1, -1),
+  vec(0, -1),
+  vec(1, -1),
 ]
 
 export class Creature {
@@ -47,6 +53,8 @@ export class Creature {
   coloringPercentage: number
   coloringSpread: number
   speed: number
+  // a number from -1 to 1 indicating if it should be attracted or repulsed
+  attraction: number
 
   preference: CDF
   private walk: CDF
@@ -56,7 +64,7 @@ export class Creature {
     const y = () => Math.floor(Math.random() * window.innerHeight)
     const c = () => Math.floor(Math.random() * 255)
     return new Creature({
-      position: vec2(x(), y()),
+      position: vec(x(), y()),
       color: new Color(c(), c(), c()),
       size: 2,
       personality: {
@@ -79,21 +87,38 @@ export class Creature {
       this.preference = args.preference
       this.coloringPercentage = args.coloringPercentage
       this.coloringSpread = args.coloringSpread
+      this.attraction = args.attraction
     } else {
-      const c = args.personality
+      const personality = args.personality
 
-      const sum = vec(Object.values(args.personality)).sum()
+      const sum = new Vector(Object.values(args.personality) as number[]).sum()
 
-      // get all chars as a percentage of total
-      const curiosity = 1
-      const dominance = 1
+      const openness = personality.openness / sum
+      const conscientiousness = personality.conscientiousness / sum
+      const extraversion = personality.extraversion / sum
+      const agreeableness = personality.agreeableness / sum
+      const neuroticism = personality.neuroticism / sum
 
-      this.speed = 1 + Math.round(4 * curiosity)
-      this.coloringSpread = 10 - Math.round(3 * dominance)
-      this.coloringPercentage = roundTwoDec(0.015 + 0.05 * dominance)
-      this.preference = CDF.fromWeights(
-        Array.from({ length: 9 }, (_) => Math.random()),
-      )
+      this.speed = 1 + Math.round(4 * (extraversion * 0.8 + neuroticism * 0.2))
+      this.coloringSpread = 10 - Math.round(3 * openness)
+      this.coloringPercentage = roundTwoDec(0.015 + 0.05 * (1 - neuroticism))
+
+      // make dot be more stubborn in how it walks
+      const preference = vec(
+        ...Array.from({ length: 9 }, (_) => Math.random()),
+      ).roundTwoDec()
+      const mean = preference.mean()
+      preference
+        .mutmap((p) => {
+          // p = p * (1 - {diff with mean} * {stretching multiplier})
+          // so when diff is positive, it is bigger than mean it will stretch up
+          // if negative it will shrink down
+          return p * (1 - (mean - p) * (1 + conscientiousness))
+        })
+        .roundTwoDec()
+      this.preference = CDF.fromWeights(preference)
+
+      this.attraction = 1 - agreeableness * 2
     }
     this.walk = this.preference.clone()
   }
@@ -102,8 +127,7 @@ export class Creature {
   updateWalk(pmf: PMF) {
     // console.log('walk update')
     // console.log(this.walk.p)
-    this.walk = this.preference.clone()
-    this.walk.add(pmf)
+    this.walk = this.preference.clone().add(pmf)
     // console.log(this.walk.p)
   }
 

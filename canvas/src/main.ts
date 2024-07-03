@@ -4,7 +4,7 @@ import { CONSTANTS } from './constants'
 import { Creature } from './creature'
 import { Simulation } from './simulation'
 import { error } from './util'
-import { vec2 } from './vec'
+import { vec } from './vec'
 
 const { SYNC_SERVER_URL } = CONSTANTS
 
@@ -51,7 +51,7 @@ async function sync() {
       switch (cmd.type) {
         case 'create': {
           const creature = new Creature({
-            position: vec2(...cmd.position),
+            position: vec(...cmd.position),
             size: cmd.size,
             color: new Color(cmd.color),
             personality: cmd.personality,

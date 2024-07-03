@@ -115,10 +115,12 @@ export class Rasterizer {
     for (let xi = 0; xi < dx; xi++) {
       const xo = (x + xi) * 4 + o
       const fadingPerc = percentage * (1 - Math.abs((mid - xi) / mid))
-      for (let i = 0; i < 4; i++) {
-        const diff = c.c[i % 4]! - this.buffer[i]!
+      for (let i = 0; i < 3; i++) {
+        const diff = c.c[i % 4]! - this.buffer[xo + i]!
         this.buffer[xo + i] += Math.sign(diff) * Math.abs(diff) * fadingPerc
       }
+      // assume that alpha is always 255
+      // this.buffer[xo + 3] = 255
     }
   }
 

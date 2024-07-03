@@ -47,7 +47,10 @@ export class CDF {
 
   /** Create a cdf from non normalized list of numbers */
   static fromWeights(values: number[]) {
-    const sum = values.reduce((partialSum, a) => partialSum + a, 0)
+    const sum = values.reduce((partialSum, a) => {
+      if (a < 0) throw Error("can't give negative values to cdf")
+      return partialSum + a
+    }, 0)
     const p = values.map((v) => roundTwoDec(v / sum))
     return new CDF(p)
   }
@@ -87,8 +90,8 @@ export class CDF {
     this.p = cdf.p
   }
 
-  add(pmf: PMF): void
-  add(cdf: CDF): void
+  add(pmf: PMF): CDF
+  add(cdf: CDF): CDF
   add(fun: PMF | CDF) {
     const p = fun.p
 
@@ -97,6 +100,7 @@ export class CDF {
     }
 
     this.f = this.fromProbabilities(this.p)
+    return this
   }
 
   /** draw a random number from pmf */

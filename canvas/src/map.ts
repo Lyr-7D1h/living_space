@@ -1,7 +1,7 @@
 import { Color } from './color'
 import { CONSTANTS } from './constants'
 import { type Creature } from './creature'
-import { vec2, type Vector } from './vec'
+import { vec, type Vector } from './vec'
 
 /**
  * Map that uses spatial 'hashing' for efficiently dealing with creature interaction
@@ -53,7 +53,7 @@ export class Map {
     this.cellEntries.fill(0)
 
     for (const c of this.creatures) {
-      const i = this.getIndex(c.position.vec)
+      const i = this.getIndex(c.position)
       this.cellStart[i]++
     }
 
@@ -64,14 +64,14 @@ export class Map {
     }
 
     for (let ci = 0; ci < this.creatures.length; ci++) {
-      const i = this.getIndex(this.creatures[ci]!.position.vec)
+      const i = this.getIndex(this.creatures[ci]!.position)
       this.cellStart[i]--
       this.cellEntries[this.cellStart[i]!] = ci
     }
   }
 
   /** get the index of a tile from normal cartesian coordiantes */
-  getIndex([x, y]: [number, number]) {
+  getIndex({ x, y }: Vector<2>) {
     // wrap coords
     if (x < 0) x = this.width + x
     if (x > this.width - 1) x = x % this.width
@@ -172,7 +172,7 @@ export class Map {
 
   /** all nearest neighbor within the spacing of the grid (might be outside distance), returns an iterator with all the ids */
   nearestNeighborsFromGrid(i: number, distance: number): Iterator<number> {
-    const [x, y] = this.creatures[i]!.position.vec
+    const { x, y } = this.creatures[i]!.position
     this.querySize = 0
 
     const x0 = Math.floor((x - distance) / this.spacing)
@@ -260,11 +260,11 @@ function getWrapCorrection(w: number, h: number, qc: number, qn: number) {
     case 0:
       switch (qn) {
         case 1:
-          return vec2(-w, 0)
+          return vec(-w, 0)
         case 2:
-          return vec2(0, -h)
+          return vec(0, -h)
         case 3:
-          return vec2(-w, -h)
+          return vec(-w, -h)
       }
       throw Error(
         "neighbor can't be in the same quadrant if direction is above distance check",
@@ -272,11 +272,11 @@ function getWrapCorrection(w: number, h: number, qc: number, qn: number) {
     case 1:
       switch (qn) {
         case 0:
-          return vec2(w, 0)
+          return vec(w, 0)
         case 2:
-          return vec2(w, -h)
+          return vec(w, -h)
         case 3:
-          return vec2(0, -h)
+          return vec(0, -h)
       }
       throw Error(
         "neighbor can't be in the same quadrant if direction is above distance check",
@@ -284,11 +284,11 @@ function getWrapCorrection(w: number, h: number, qc: number, qn: number) {
     case 2:
       switch (qn) {
         case 0:
-          return vec2(0, h)
+          return vec(0, h)
         case 1:
-          return vec2(-w, h)
+          return vec(-w, h)
         case 3:
-          return vec2(-w, 0)
+          return vec(-w, 0)
       }
       throw Error(
         "neighbor can't be in the same quadrant if direction is above distance check",
@@ -296,11 +296,11 @@ function getWrapCorrection(w: number, h: number, qc: number, qn: number) {
     case 3:
       switch (qn) {
         case 0:
-          return vec2(w, h)
+          return vec(w, h)
         case 1:
-          return vec2(0, h)
+          return vec(0, h)
         case 2:
-          return vec2(w, 0)
+          return vec(w, 0)
       }
       throw Error(
         "neighbor can't be in the same quadrant if direction is above distance check",
@@ -313,7 +313,7 @@ function getWrapCorrection(w: number, h: number, qc: number, qn: number) {
 
 /** get which quadrant a coord is returns 0 to 3 */
 function quadrant(width: number, height: number, p: Vector<2>) {
-  const [x, y] = p.vec
+  const { x, y } = p
   let q = 0
   if (x > width / 2) {
     q += 1

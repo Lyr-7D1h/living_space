@@ -2,7 +2,7 @@ import { Color } from './color'
 import { CONSTANTS } from './constants'
 import { Creature } from './creature'
 import { debug } from './log'
-import { vec2 } from './vec'
+import { vec } from './vec'
 import { Rasterizer } from './rasterizer'
 import { Debug } from './debug'
 import { Map } from './map'
@@ -37,8 +37,8 @@ export class Simulation {
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
     this.creatures = []
-    this.creatures.push(Creature.random({ position: vec2(10, 50) }))
-    this.creatures.push(Creature.random({ position: vec2(850, 50) }))
+    this.creatures.push(Creature.random({ position: vec(10, 50) }))
+    this.creatures.push(Creature.random({ position: vec(850, 50) }))
 
     for (let i = 0; i < CONSTANTS.COUNT_START_CREATURES; i++) {
       this.creatures.push(Creature.random())
@@ -70,7 +70,7 @@ export class Simulation {
         const x = event.pageX
         const y = event.pageY
 
-        this.addCreature(Creature.random({ position: vec2(x, y) }))
+        this.addCreature(Creature.random({ position: vec(x, y) }))
       },
       false,
     )
@@ -193,10 +193,10 @@ export class Simulation {
         }
         const theta = Math.atan2(dir.y, dir.x)
         if (CONSTANTS.DEBUG_VISUAL) {
-          const [x0, y0] = c.position.vec
-          const [x1, y1] = c.position
+          const { x: x0, y: y0 } = c.position
+          const { x: x1, y: y1 } = c.position
             .clone()
-            .add(dir.norm().scale(30).round()).vec
+            .add(dir.norm().scale(30).round())
           // console.log(y0, y1, dir.norm().scale(30).round().vec)
           this.painting.line(x0, y0, x1, y1, new Color(0, 255, 0))
         }
