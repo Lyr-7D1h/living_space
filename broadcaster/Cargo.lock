@@ -118,6 +118,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "broadcaster"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "crossbeam",
+ "env_logger",
+ "futures-util",
+ "log",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-tungstenite",
+]
+
+[[package]]
 name = "byteorder"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -149,21 +164,6 @@ name = "colorchoice"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b6a852b24ab71dffc585bcb46eaf7959d175cb865a7152e35b348d1b2960422"
-
-[[package]]
-name = "controls"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "crossbeam",
- "env_logger",
- "futures-util",
- "log",
- "serde",
- "serde_json",
- "tokio",
- "tokio-tungstenite",
-]
 
 [[package]]
 name = "cpufeatures"

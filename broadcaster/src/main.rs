@@ -1,4 +1,4 @@
-use controls::server::SimulationServer;
+use broadcaster::server::SimulationServer;
 use env_logger::Env;
 
 #[tokio::main]

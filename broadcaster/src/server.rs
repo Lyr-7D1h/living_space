@@ -14,12 +14,15 @@ use tokio::{
     },
     time::sleep,
 };
-use tokio_tungstenite::{tungstenite::Message, WebSocketStream};
+use tokio_tungstenite::{
+    tungstenite::{self},
+    WebSocketStream,
+};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
-pub enum Command {
+pub enum Message {
     Init {
         connection_type: ConnectionType,
     },
@@ -78,7 +81,7 @@ impl SimulationServer {
 
     pub async fn listen(self) -> Result<()> {
         info!("Listening on: {:?}", self.listener.local_addr()?);
-        let (tx, rx) = broadcast::channel::<Command>(100);
+        let (tx, rx) = broadcast::channel::<Message>(100);
 
         let mut handles = vec![];
         while let Ok((mut stream, _)) = self.listener.accept().await {
@@ -125,13 +128,15 @@ async fn init(stream: &mut TcpStream) -> Result<(WSStream, ConnectionType)> {
     let message = msg
         .map(|m| m.ok_or(anyhow!("no message given")))
         .context("error occurred while reading from stream")??;
-    let command: Command = match message {
-        Message::Text(text) => serde_json::from_str(&text).context("failed to parse command")?,
-        Message::Close(_) => return Err(anyhow!("closing early")),
+    let command: Message = match message {
+        tungstenite::Message::Text(text) => {
+            serde_json::from_str(&text).context("failed to parse command")?
+        }
+        tungstenite::Message::Close(_) => return Err(anyhow!("closing early")),
         _ => return Err(anyhow!("invalid message data type")),
     };
     match command {
-        Command::Init { connection_type } => return Ok((ws_stream, connection_type)),
+        Message::Init { connection_type } => return Ok((ws_stream, connection_type)),
         _ => return Err(anyhow!("no init given")),
     }
 }
@@ -140,29 +145,29 @@ async fn session<'n>(
     mut stream: WSStream<'n>,
     connection_type: ConnectionType,
     state: Arc<Mutex<State>>,
-    tx: Sender<Command>,
-    mut rx: Receiver<Command>,
+    tx: Sender<Message>,
+    mut rx: Receiver<Message>,
 ) -> Result<()> {
     if let ConnectionType::Controller = connection_type {
         if let Some(config) = &(state.lock().await).latest_config {
-            tx.send(Command::Config(config.clone()))?;
+            tx.send(Message::Config(config.clone()))?;
         }
     }
 
     loop {
         if let Some(msg) = stream.try_next().now_or_never() {
             if let Some(message) = msg.context("error occurred while reading from stream")? {
-                let command: Command = match message {
-                    Message::Text(text) => {
+                let command: Message = match message {
+                    tungstenite::Message::Text(text) => {
                         serde_json::from_str(&text).context("failed to parse command")?
                     }
-                    Message::Close(_) => return Ok(()),
+                    tungstenite::Message::Close(_) => return Ok(()),
                     _ => return Err(anyhow!("invalid message data type")),
                 };
 
                 // update latest config if new config set
                 match command {
-                    Command::Config(ref c) => {
+                    Message::Config(ref c) => {
                         let mut s = state.lock().await;
                         s.latest_config = Some(c.clone());
                     }
@@ -174,14 +179,14 @@ async fn session<'n>(
 
         if let Ok(cmd) = rx.try_recv() {
             match cmd {
-                Command::Config(_) => {
+                Message::Config(_) => {
                     let value = serde_json::to_string(&cmd).context("failed to send cmd")?;
-                    stream.send(Message::Text(value)).await?;
+                    stream.send(tungstenite::Message::Text(value)).await?;
                 }
-                Command::Create { .. } => {
+                Message::Create { .. } => {
                     if let ConnectionType::Canvas = connection_type {
                         let value = serde_json::to_string(&cmd).context("failed to send cmd")?;
-                        stream.send(Message::Text(value)).await?;
+                        stream.send(tungstenite::Message::Text(value)).await?;
                     }
                 }
                 _ => {}
