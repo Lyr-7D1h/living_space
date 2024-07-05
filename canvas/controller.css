@@ -87,3 +87,8 @@ input:disabled input[type='submit']:hover {
   margin-left: auto;
   margin-right: auto;
 }
+
+.column {
+  float: left;
+  width: 33%;
+}
