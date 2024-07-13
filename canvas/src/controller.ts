@@ -2,20 +2,41 @@ import iro from '@jaames/iro'
 import { type Connection, connect } from './connection'
 import { error } from './util'
 import { CONSTANTS } from './constants'
+import { mod } from './math'
 
 const colorPicker = iro.ColorPicker('#color', {
   width: 300,
+  height: 300,
   color: '#29A4DA',
 })
+
+function setupInfo() {
+  const modal = document.getElementById('modal')!
+
+  const info = document.getElementById('info-button')!
+  info.onclick = () => {
+    modal.style.display = 'block'
+    info.style.display = 'none'
+  }
+
+  const close = document.getElementById('modal-close-button')!
+  close.onclick = () => {
+    modal.style.display = 'none'
+    info.style.display = 'block'
+  }
+}
 
 export function setupCreator(
   connection: Connection,
   canvasWidth: number,
   canvasHeight: number,
 ) {
+  setupInfo()
+
   // setup position canvas to get starting position
   const posCanvas = document.getElementById('position')! as HTMLCanvasElement
-  posCanvas.width = 500
+  posCanvas.width =
+    document.getElementById('position-content')!.clientWidth - 50
   posCanvas.height = 500 * (canvasHeight / canvasWidth)
   const ctx = posCanvas.getContext('2d')!
   let position: [number, number] = [posCanvas.width / 2, posCanvas.height / 2]
@@ -68,10 +89,10 @@ export function setupCreator(
       color,
       personality: {
         openness: parseInt(data.get('curiosity')! as string),
-        conscientiousness: 0,
-        extraversion: 0,
-        agreeableness: 0,
-        neuroticism: 0,
+        conscientiousness: parseInt(data.get('curiosity')! as string),
+        extraversion: parseInt(data.get('curiosity')! as string),
+        agreeableness: parseInt(data.get('curiosity')! as string),
+        neuroticism: parseInt(data.get('curiosity')! as string),
       },
     })
     submit.setAttribute('disabled', '')

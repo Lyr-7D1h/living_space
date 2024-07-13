@@ -5,13 +5,13 @@ import { Vector, vec } from './vec'
 
 /** https://en.wikipedia.org/wiki/Big_Five_personality_traits */
 export interface Personality {
-  /** curious - cautious */
+  /** cautious - curious */
   openness: number
-  /** organized - careless */
+  /** careless - organized */
   conscientiousness: number
-  /** energetic - reserved */
+  /** reserved - energetic */
   extraversion: number
-  /** compassionate - judgemental */
+  /** judgemental- compassionate */
   agreeableness: number
   /** nervous - confident */
   neuroticism: number

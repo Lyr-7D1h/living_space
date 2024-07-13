@@ -5,81 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Living Space</title>
     <link rel="stylesheet" href="./controller.css" />
+    <link rel="stylesheet" href="./lib/fontawesome.css" />
   </head>
   <body>
-    <div id="messages"></div>
+    <div id="messages" style="display: none"></div>
+
+    <div id="modal" style="display: none">
+      <span id="modal-close-button" class="fas fa-times"></span>
+      <div id="modal-content">
+        <h1>Living Space</h1>
+        <p>
+          Welcome to Living Space! This is a simulation of a small ecosystem
+          where creatures interact with each other and their environment. You
+          can create new creatures by clicking on the canvas. Each creature has
+          a unique personality that influences how they interact with their
+          environment and other creatures. You can also change the environment
+          by clicking and dragging the background. Have fun!
+        </p>
+      </div>
+    </div>
+
     <div id="creature_creator">
+      <span id="info-button" class="fas fa-info-circle"></span>
       <!-- TODO: add info button -->
       <form id="creature_creator_form">
-        <div
-          style="
-            width: 50%;
-            height: 100%;
-            position: absolute;
-            left: 0;
-            margin: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          "
-        >
-          <div style="width: 100%">
+        <div class="column left">
+          <div id="position-content" style="width: 100%">
             <label for="position">Position</label>
             <canvas id="position"> </canvas>
           </div>
         </div>
-        <div
-          style="
-            width: 50%;
-            height: 100%;
-            position: absolute;
-            right: 0;
-            margin: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          "
-        >
-          <div style="width: 100%">
+        <div class="column right">
+          <div style="width: 100%; padding: 0px 5px 0px 5px">
             <div id="color" style="margin: auto"></div>
             <label for="openness">Openness</label>
-            <div style="margin: 10px">
-              <div class="column">Curious</div>
-              <div class="column">
+            <div class="slider">
+              <div class="text">Cautious</div>
+              <div class="slider-input">
                 <input
                   name="openness"
                   type="range"
-                  min="1"
-                  max="100"
-                  value="50"
+                  min="-50"
+                  max="50"
+                  value="0"
                 />
               </div>
-              <div class="column">Cautious</div>
+              <div class="text">Curious</div>
             </div>
-            <label for="dominance">Dominance</label>
-            <div>
-              <input
-                name="dominance"
-                type="range"
-                min="1"
-                max="100"
-                value="50"
-              />
+            <label for="conscientiousness">Conscientiousness</label>
+            <div class="slider">
+              <div class="text">Careless</div>
+              <div class="slider-input">
+                <input
+                  name="conscientiousness"
+                  type="range"
+                  min="-50"
+                  max="50"
+                  value="0"
+                />
+              </div>
+              <div class="text">Organized</div>
             </div>
-            <label for="dominance">Dominance</label>
-            <input name="dominance" type="range" min="1" max="100" value="50" />
-            <label for="dominance">Dominance</label>
-            <input name="dominance" type="range" min="1" max="100" value="50" />
-            <label for="dominance">Dominance</label>
-            <input name="dominance" type="range" min="1" max="100" value="50" />
-            <!-- <label for="friendliness">Friendliness</label>
-            <input
-              name="friendliness"
-              type="range"
-              min="1"
-              max="100"
-              value="50"
-            /> -->
+            <label for="extraversion">Extraversion</label>
+            <div class="slider">
+              <div class="text">Introverted</div>
+              <div class="slider-input">
+                <input
+                  name="extraversion"
+                  type="range"
+                  min="-50"
+                  max="50"
+                  value="0"
+                />
+              </div>
+              <div class="text">Extraverted</div>
+            </div>
+            <label for="agreeableness">Agreeableness</label>
+            <div class="slider">
+              <div class="text">Judgmental</div>
+              <div class="slider-input">
+                <input
+                  name="agreeableness"
+                  type="range"
+                  min="-50"
+                  max="50"
+                  value="0"
+                />
+              </div>
+              <div class="text">Agreeable</div>
+            </div>
+            <label for="neuroticism">Neuroticism</label>
+            <div class="slider">
+              <div class="text">Nervous</div>
+              <div class="slider-input">
+                <input
+                  name="neuroticism"
+                  type="range"
+                  min="-50"
+                  max="50"
+                  value="0"
+                />
+              </div>
+              <div class="text">Confident</div>
+            </div>
             <input id="submit" type="submit" value="Create" disabled />
           </div>
         </div>

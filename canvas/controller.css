@@ -45,8 +45,6 @@ body {
 }
 
 #creature_creator {
-  z-index: 999;
-  /* width: 100%; */
   text-align: center;
   color: white;
 }
@@ -58,11 +56,11 @@ label {
   width: 100%;
   padding-top: 20px;
   padding-bottom: 10px;
+  font-size: 1.2em;
 }
 input {
-  width: 80%;
-  margin-bottom: 10px;
-  margin-top: 10px;
+  width: 90%;
+  margin: 10px 0 10px 0;
 }
 input[type='submit'] {
   background-color: #0083ee;
@@ -89,6 +87,85 @@ input:disabled input[type='submit']:hover {
 }
 
 .column {
-  float: left;
-  width: 33%;
+  width: 50%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.column.right {
+  right: 0;
+  left: auto;
+}
+.column.left {
+  left: 0;
+  right: auto;
+}
+.slider {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.text {
+  flex: 1;
+  font-size: 1.1em;
+  text-align: center;
+}
+.slider-input {
+  flex: 6;
+}
+
+#info-button {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  font-size: 2em;
+  color: black;
+  z-index: 50;
+}
+#info-button:hover {
+  cursor: pointer;
+  color: #111;
+}
+
+#modal {
+  position: fixed;
+  top: 0;
+  color: white;
+  z-index: 999;
+  background-color: #000000c4;
+  width: 100vw;
+  height: 100vh;
+  overflow: scroll;
+}
+#modal-content {
+  width: 50%;
+  left: 25%;
+  top: 10%;
+  font-size: 1.3em;
+  line-height: 1.5em;
+  position: absolute;
+}
+#modal-close-button {
+  position: fixed;
+  top: 0;
+  right: 0;
+  font-size: 2em;
+  padding: 10px;
+}
+#modal-close-button:hover {
+  cursor: pointer;
+  color: #eee;
+}
+
+@media screen and (max-width: 1100px) {
+  .column {
+    width: 100%;
+    position: relative;
+    margin: 20px;
+    margin: 0 0 30px 0;
+  }
 }
