@@ -72,6 +72,15 @@ export class Color {
     this.c[3] = v
   }
 
+  mix(color: Color) {
+    return new Color(
+      (this.r + color.r) / 2,
+      (this.g + color.g) / 2,
+      (this.b + color.b) / 2,
+      (this.a + color.a) / 2,
+    )
+  }
+
   clone(): Color {
     return new Color(this.r, this.g, this.b)
   }

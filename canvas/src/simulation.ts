@@ -182,11 +182,15 @@ export class Simulation {
   private updateCreatureAttraction(map: Map) {
     for (let ci = 0; ci < this.creatures.length; ci++) {
       const c = this.creatures[ci]!
-      for (const [_cni, dir, dirMag2] of map.nearestNeighbors(
+      for (const [cni, dir, dirMag2] of map.nearestNeighbors(
         ci,
         CONSTANTS.CREATURE_VIEWDISTANCE,
       )) {
         if (dirMag2 < c.size ** 2) {
+          const args = c.procreate(this.creatures[cni]!)
+          if (args !== null) {
+            this.addCreature(new Creature(this.creatures.length, args))
+          }
           console.log('Collision')
         }
         const theta = Math.atan2(dir.y, dir.x)

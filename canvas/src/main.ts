@@ -50,11 +50,12 @@ async function sync() {
       const cmd = d
       switch (cmd.type) {
         case 'create': {
-          const creature = new Creature({
+          const creature = new Creature(simulation.creatures.length, {
             position: vec(...cmd.position),
             size: cmd.size,
             color: new Color(cmd.color),
             personality: cmd.personality,
+            ancestors: [],
           })
           simulation.addCreature(creature)
           break

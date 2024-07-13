@@ -150,15 +150,15 @@ export class Map {
               .sub(c.position)
           }
 
-          const dirMag = pn.mag2()
+          const dirMag2 = dir.mag2()
 
           // if distance is bigger than range skip
-          if (dir.mag2() > distanceSquared) {
+          if (dirMag2 > distanceSquared) {
             return next()
           }
 
           return {
-            value: [this.ids[i]!, dir, dirMag],
+            value: [this.ids[i]!, dir, dirMag2],
             done: false,
           }
         }

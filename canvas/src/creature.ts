@@ -21,6 +21,7 @@ export interface CreatureArgs {
   position: Vector<2>
   size: number
   color: Color
+  ancestors: Set<number>
   personality: Personality
 }
 
@@ -37,6 +38,8 @@ const directions = [
 ]
 
 export class Creature {
+  name: number
+  ancestors: Set<number>
   position: Vector<2>
   size: number
   color: Color
@@ -47,6 +50,7 @@ export class Creature {
   attraction: number
   // number from 0 to 1 indicating how far it can view from its max viewing distance
   viewport: number
+  personality: Personality
 
   preference: CDF
   private walk: CDF
@@ -55,10 +59,11 @@ export class Creature {
     const x = () => Math.floor(Math.random() * window.innerWidth)
     const y = () => Math.floor(Math.random() * window.innerHeight)
     const c = () => Math.floor(Math.random() * 255)
-    return new Creature({
+    return new Creature(Math.random(), {
       position: vec(x(), y()),
       color: new Color(c(), c(), c()),
       size: 2,
+      ancestors: new Set([]),
       personality: {
         openness: Math.random(),
         conscientiousness: Math.random(),
@@ -70,7 +75,9 @@ export class Creature {
     })
   }
 
-  constructor(args: CreatureArgs) {
+  constructor(name: number, args: CreatureArgs) {
+    this.name = name
+    this.ancestors = args.ancestors
     this.position = args.position
     this.size = args.size
     this.color = args.color
@@ -109,16 +116,57 @@ export class Creature {
     this.attraction = roundTwoDec(1 - conscientiousness * 2)
     this.walk = this.preference.clone()
     this.viewport = extraversion
+
+    this.personality = personality
   }
 
   /** update the way this creature walks */
   updateWalk(pmf: PMF) {
+    // console.log(pmf, this.attraction)
+    vec(pmf.p).mutmap((p) => p * this.attraction)
+    // console.log(pmf)
     this.walk = this.preference.clone().add(pmf)
   }
 
   /** returns a new creature or null if they don't like eachother */
-  procreate(creature: Creature): Creature | null {
-    // TODO: procreation
+  procreate(creature: Creature): CreatureArgs | null {
+    // can't procreate with ancestors
+    if (
+      creature.ancestors.has(this.name) ||
+      this.ancestors.has(creature.name)
+    ) {
+      return null
+    }
+    if (Math.random() < this.personality.agreeableness / 100) {
+      const ancestors = this.ancestors.union(creature.ancestors)
+      ancestors.add(this.name)
+      ancestors.add(creature.name)
+      return {
+        ancestors,
+        position: this.position.clone(),
+        size: (this.size + creature.size) / 2,
+        color: this.color.mix(creature.color),
+        personality: {
+          openness:
+            (this.personality.openness + creature.personality.openness) / 2,
+          conscientiousness:
+            (this.personality.conscientiousness +
+              creature.personality.conscientiousness) /
+            2,
+          extraversion:
+            (this.personality.extraversion +
+              creature.personality.extraversion) /
+            2,
+          agreeableness:
+            (this.personality.agreeableness +
+              creature.personality.agreeableness) /
+            2,
+          neuroticism:
+            (this.personality.neuroticism + creature.personality.neuroticism) /
+            2,
+        },
+      }
+    }
     return null
   }
 
