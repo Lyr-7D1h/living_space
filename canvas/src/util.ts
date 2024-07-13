@@ -50,3 +50,9 @@ export function roundTwoDec(n: number) {
   // gives very small decimal numbers when adding numbers
   // return Math.round((n + Number.EPSILON) * 100) / 100
 }
+
+export function roundFourDec(n: number) {
+  return parseFloat(n.toFixed(4))
+  // gives very small decimal numbers when adding numbers
+  // return Math.round((n + Number.EPSILON) * 100) / 100
+}

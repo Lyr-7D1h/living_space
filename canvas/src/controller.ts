@@ -66,7 +66,6 @@ export function setupCreator(
   const form = document.getElementById(
     'creature_creator_form',
   )! as HTMLFormElement
-  console.log(form)
   form.onsubmit = (e) => {
     e.preventDefault()
     const data = new FormData(form)

@@ -47,11 +47,11 @@ pub enum ConnectionType {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct Personality {
-    openness: i32,
-    conscientiousness: i32,
-    extraversion: i32,
-    agreeableness: i32,
-    neuroticism: i32,
+    openness: u32,
+    conscientiousness: u32,
+    extraversion: u32,
+    agreeableness: u32,
+    neuroticism: u32,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -65,16 +65,16 @@ pub struct State {
     latest_config: Option<Config>,
 }
 
-pub struct SimulationServer {
+pub struct Broadcaster {
     listener: TcpListener,
     state: Arc<Mutex<State>>,
 }
 
-impl SimulationServer {
-    pub async fn bind<A: ToSocketAddrs>(addr: A) -> Result<SimulationServer> {
+impl Broadcaster {
+    pub async fn bind<A: ToSocketAddrs>(addr: A) -> Result<Broadcaster> {
         let listener = TcpListener::bind(addr).await?;
 
-        return Ok(SimulationServer {
+        return Ok(Broadcaster {
             listener,
             state: Arc::new(Mutex::new(State {
                 latest_config: None,

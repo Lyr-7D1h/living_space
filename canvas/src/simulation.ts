@@ -37,8 +37,6 @@ export class Simulation {
     debug(`Created ${this.ctx.canvas.width}x${this.ctx.canvas.height} canvas`)
 
     this.creatures = []
-    this.creatures.push(Creature.random({ position: vec(10, 50) }))
-    this.creatures.push(Creature.random({ position: vec(850, 50) }))
 
     for (let i = 0; i < CONSTANTS.COUNT_START_CREATURES; i++) {
       this.creatures.push(Creature.random())
@@ -218,7 +216,9 @@ export class Simulation {
   }
 
   addCreature(creature: Creature) {
-    debug(`Adding creature ${JSON.stringify(creature)}`)
+    debug('Adding creature ')
+    console.log(JSON.stringify(creature))
+
     this.creatures.push(creature)
   }
 }
