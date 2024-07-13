@@ -2,7 +2,6 @@ import iro from '@jaames/iro'
 import { type Connection, connect } from './connection'
 import { error } from './util'
 import { CONSTANTS } from './constants'
-import { mod } from './math'
 
 const colorPicker = iro.ColorPicker('#color', {
   width: 300,
@@ -67,6 +66,7 @@ export function setupCreator(
   const form = document.getElementById(
     'creature_creator_form',
   )! as HTMLFormElement
+  console.log(form)
   form.onsubmit = (e) => {
     e.preventDefault()
     const data = new FormData(form)
@@ -88,11 +88,11 @@ export function setupCreator(
       size: 2,
       color,
       personality: {
-        openness: parseInt(data.get('curiosity')! as string),
-        conscientiousness: parseInt(data.get('curiosity')! as string),
-        extraversion: parseInt(data.get('curiosity')! as string),
-        agreeableness: parseInt(data.get('curiosity')! as string),
-        neuroticism: parseInt(data.get('curiosity')! as string),
+        openness: parseInt(data.get('openness')! as string),
+        conscientiousness: parseInt(data.get('conscientiousness')! as string),
+        extraversion: parseInt(data.get('extraversion')! as string),
+        agreeableness: parseInt(data.get('agreeableness')! as string),
+        neuroticism: parseInt(data.get('neuroticism')! as string),
       },
     })
     submit.setAttribute('disabled', '')
@@ -124,6 +124,9 @@ async function sync() {
 
   connection.on('message', (d) => {
     switch (d.type) {
+      case 'error':
+        error(d.message)
+        break
       case 'config':
         setupCreator(connection, d.width, d.height)
         break

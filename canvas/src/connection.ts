@@ -43,6 +43,7 @@ export type Message =
       color: [number, number, number]
       personality: Personality
     }
+  | { type: 'error'; message: string }
 
 export class Connection {
   private readonly socket: WebSocket

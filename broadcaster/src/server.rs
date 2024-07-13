@@ -23,6 +23,9 @@ use tokio_tungstenite::{
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum Message {
+    Error {
+        message: String,
+    },
     Init {
         connection_type: ConnectionType,
     },
@@ -44,11 +47,11 @@ pub enum ConnectionType {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct Personality {
-    openness: u32,
-    conscientiousness: u32,
-    extraversion: u32,
-    agreeableness: u32,
-    neuroticism: u32,
+    openness: i32,
+    conscientiousness: i32,
+    extraversion: i32,
+    agreeableness: i32,
+    neuroticism: i32,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -130,7 +133,7 @@ async fn init(stream: &mut TcpStream) -> Result<(WSStream, ConnectionType)> {
         .context("error occurred while reading from stream")??;
     let command: Message = match message {
         tungstenite::Message::Text(text) => {
-            serde_json::from_str(&text).context("failed to parse command")?
+            serde_json::from_str(&text).context("failed to parse message")?
         }
         tungstenite::Message::Close(_) => return Err(anyhow!("closing early")),
         _ => return Err(anyhow!("invalid message data type")),
@@ -157,23 +160,34 @@ async fn session<'n>(
     loop {
         if let Some(msg) = stream.try_next().now_or_never() {
             if let Some(message) = msg.context("error occurred while reading from stream")? {
-                let command: Message = match message {
-                    tungstenite::Message::Text(text) => {
-                        serde_json::from_str(&text).context("failed to parse command")?
-                    }
+                let command: Result<Message, serde_json::Error> = match message {
+                    tungstenite::Message::Text(text) => serde_json::from_str(&text),
                     tungstenite::Message::Close(_) => return Ok(()),
                     _ => return Err(anyhow!("invalid message data type")),
                 };
 
                 // update latest config if new config set
                 match command {
-                    Message::Config(ref c) => {
-                        let mut s = state.lock().await;
-                        s.latest_config = Some(c.clone());
+                    Ok(command) => {
+                        match command {
+                            Message::Config(ref c) => {
+                                let mut s = state.lock().await;
+                                s.latest_config = Some(c.clone());
+                            }
+                            _ => {}
+                        }
+                        tx.send(command)?;
                     }
-                    _ => {}
+                    Err(e) => {
+                        error!("{e}");
+                        let message = Message::Error {
+                            message: format!("failed to parse message: {e}"),
+                        };
+                        let value =
+                            serde_json::to_string(&message).context("failed to send message")?;
+                        stream.send(tungstenite::Message::Text(value)).await?;
+                    }
                 }
-                tx.send(command)?;
             }
         };
 

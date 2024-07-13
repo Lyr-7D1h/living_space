@@ -15,7 +15,7 @@ body {
 }
 #messages {
   z-index: 1000;
-  position: absolute;
+  position: fixed;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -167,5 +167,10 @@ input:disabled input[type='submit']:hover {
     position: relative;
     margin: 20px;
     margin: 0 0 30px 0;
+  }
+}
+@media screen and (max-height: 900px) {
+  #color {
+    margin-top: 300px !important;
   }
 }
