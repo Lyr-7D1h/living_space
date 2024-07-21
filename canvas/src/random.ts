@@ -51,6 +51,7 @@ export class CDF {
       if (a < 0) throw Error("can't give negative values to cdf")
       return partialSum + a
     }, 0)
+    console.assert(sum > 0, sum, values)
     const p = values.map((v) => roundTwoDec(v / sum))
     return new CDF(p)
   }
@@ -61,6 +62,7 @@ export class CDF {
     this.f = this.fromProbabilities(p)
   }
 
+  /** from a list of numbers that sum up to 1 */
   private fromProbabilities(p: number[]) {
     let a = 0
     const f = p.map((p) => {
@@ -68,6 +70,11 @@ export class CDF {
       if (a > 1) return 1
       return roundTwoDec(a)
     })
+
+    if (CONSTANTS.ASSERTS) {
+      const sum = roundTwoDec(p.reduce((a, b) => a + b))
+      console.assert(sum === 1, sum)
+    }
 
     // account for floating point errors
     f[f.length - 1] = 1
@@ -95,10 +102,12 @@ export class CDF {
   add(fun: PMF | CDF) {
     const p = fun.p
 
+    // update probabilities
     for (let i = 0; i < this.p.length; i++) {
       this.p[i] = roundTwoDec((this.p[i]! + p[i]!) / 2)
     }
 
+    // update cdf
     this.f = this.fromProbabilities(this.p)
     return this
   }

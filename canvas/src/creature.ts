@@ -1,5 +1,6 @@
 import { Color } from './color'
-import { CDF, type PMF } from './random'
+import { mod } from './math'
+import { CDF } from './random'
 import { roundFourDec, roundTwoDec } from './util'
 import { Vector, vec } from './vec'
 
@@ -28,13 +29,13 @@ export interface CreatureArgs {
 const directions = [
   vec(0, 0),
   vec(1, 0),
-  vec(1, 1),
-  vec(0, 1),
-  vec(-1, 1),
-  vec(-1, 0),
-  vec(-1, -1),
-  vec(0, -1),
   vec(1, -1),
+  vec(0, -1),
+  vec(-1, -1),
+  vec(-1, 0),
+  vec(-1, 1),
+  vec(0, 1),
+  vec(1, 1),
 ]
 
 export class Creature {
@@ -53,7 +54,7 @@ export class Creature {
   personality: Personality
 
   preference: CDF
-  private walk: CDF
+  walk: CDF
 
   static random(args?: Partial<CreatureArgs>) {
     const x = () => Math.floor(Math.random() * window.innerWidth)
@@ -63,7 +64,7 @@ export class Creature {
       position: vec(x(), y()),
       color: new Color(c(), c(), c()),
       size: 2,
-      ancestors: new Set([]),
+      ancestors: new Set(),
       personality: {
         openness: Math.random(),
         conscientiousness: Math.random(),
@@ -120,17 +121,48 @@ export class Creature {
     this.personality = personality
   }
 
-  /** update the way this creature walks */
-  updateWalk(pmf: PMF) {
-    // console.log(pmf, this.attraction)
-    vec(pmf.p).mutmap((p) => p * this.attraction)
-    // console.log(pmf)
-    this.walk = this.preference.clone().add(pmf)
+  /** gets run on each simulation update */
+  update() {
+    this.walk = this.preference
+  }
+
+  /** update the way this creature walks compared to direction of neighbor */
+  updateWalk(dir: Vector<2>) {
+    // angle from -pi to pi, negative y because y is down
+    const atan2 = Math.atan2(-dir.y, dir.x)
+    // angle from 0 to 2pi
+    const theta = mod(atan2, 2 * Math.PI)
+    // offset angle by 1/8 of a circle to fit within a 1/8th piece, wrap around if above 2 pi
+    // find index by splitting the circle in 8 pieces and seeing where the angle lands
+    const i = Math.floor(mod(theta + Math.PI / 8, 2 * Math.PI) / (Math.PI / 4))
+    const calcAttraction = (mul: number) => {
+      // calculate how much it moves in this direction based on attraction
+      // if attraction is negative, it will move away from the direction
+      const r = 1 / 8 + 2 * mul * this.attraction
+      if (r < 0) {
+        return 1
+      }
+      return 1 + r
+    }
+
+    // multiply preference by an attraction multiplier
+    const attraction = [...this.preference.p] // offset by 1 because creatures can also stay in position
+    attraction[1 + mod(i - 4, 8)] *= calcAttraction(-3 / 8)
+    attraction[1 + mod(i - 3, 8)] *= calcAttraction(-1 / 8)
+    attraction[1 + mod(i + 3, 8)] *= calcAttraction(-1 / 8)
+    attraction[1 + mod(i - 2, 8)] *= 1 / 8
+    attraction[1 + mod(i + 2, 8)] *= 1 / 8
+    attraction[1 + mod(i - 1, 8)] *= calcAttraction(1 / 8)
+    attraction[1 + mod(i + 1, 8)] *= calcAttraction(1 / 8)
+    attraction[1 + i] *= calcAttraction(3 / 8)
+
+    this.walk = CDF.fromWeights(attraction)
   }
 
   /** returns a new creature or null if they don't like eachother */
   procreate(creature: Creature): CreatureArgs | null {
     // can't procreate with ancestors
+    // console.log(creature.ancestors, this.ancestors)
     if (
       creature.ancestors.has(this.name) ||
       this.ancestors.has(creature.name)
@@ -141,6 +173,8 @@ export class Creature {
       const ancestors = this.ancestors.union(creature.ancestors)
       ancestors.add(this.name)
       ancestors.add(creature.name)
+      this.attraction *= 0.9
+      creature.attraction *= 0.9
       return {
         ancestors,
         position: this.position.clone(),

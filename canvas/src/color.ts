@@ -1,3 +1,5 @@
+import { CONSTANTS } from './constants'
+
 export class Color {
   c: number[] | Uint8ClampedArray
 
@@ -22,6 +24,21 @@ export class Color {
     b?: number,
     a?: number,
   ) {
+    if (CONSTANTS.ASSERTS) {
+      if (!Number.isInteger(r)) throw Error('has to be an integer')
+      if (typeof g !== 'undefined' && !Number.isInteger(g)) {
+        throw Error('has to be an integer')
+      }
+      if (typeof b !== 'undefined' && !Number.isInteger(b)) {
+        throw Error('has to be an integer')
+      }
+      if (typeof g !== 'undefined' && !Number.isInteger(g)) {
+        throw Error('has to be an integer')
+      }
+      if (typeof a !== 'undefined' && !Number.isInteger(a)) {
+        throw Error('has to be an integer')
+      }
+    }
     if (r instanceof Uint8ClampedArray || Array.isArray(r)) {
       if (r.length === 3) {
         this.c = [...r, 255]

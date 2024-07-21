@@ -32,7 +32,7 @@ export class Rasterizer {
   rectangle(x: number, y: number, dx: number, dy: number, c: Color) {
     const width = this.data.width * 4
     for (let o = y * width; o <= (y + dy) * width; o += width) {
-      for (let d = x * 4; d <= (x + dx) * 4; d++) {
+      for (let d = x * 4; d < (x + dx) * 4; d++) {
         this.buffer[o + d] = c.c[d % 4]!
       }
     }
@@ -49,7 +49,7 @@ export class Rasterizer {
     const v = [c.r, c.g, c.b, 255]
     const width = this.data.width * 4
     for (let o = y * width; o <= (y + dy) * width; o += width) {
-      for (let d = x * 4; d <= (x + dx) * 4; d++) {
+      for (let d = x * 4; d < (x + dx) * 4; d++) {
         const i = o + d
         const diff = v[d % 4]! - this.buffer[i]!
         this.buffer[i] += Math.sign(diff) * Math.abs(diff) * percentage
@@ -239,7 +239,7 @@ export class Rasterizer {
       let i = 0
       let j = 0
       for (let o = y * width; o <= (y + dy) * width; o += width) {
-        for (let d = x * 4; d <= (x + dx) * 4; d++) {
+        for (let d = x * 4; d < (x + dx) * 4; d++) {
           this.buffer[o + d] = value[j]![i]!
           i++
         }

@@ -55,7 +55,7 @@ async function sync() {
             size: cmd.size,
             color: new Color(cmd.color),
             personality: cmd.personality,
-            ancestors: [],
+            ancestors: new Set(),
           })
           simulation.addCreature(creature)
           break
