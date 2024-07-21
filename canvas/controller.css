@@ -62,6 +62,17 @@ input {
   width: 90%;
   margin: 10px 0 10px 0;
 }
+button {
+  width: 90%;
+  background-color: #5a5a5a;
+  border: none;
+  padding: 15px;
+  color: white;
+}
+button:hover {
+  background-color: #4b4b4b;
+  cursor: pointer;
+}
 input[type='submit'] {
   background-color: #0083ee;
   border: none;
@@ -123,12 +134,12 @@ input:disabled input[type='submit']:hover {
   top: 15px;
   right: 15px;
   font-size: 2em;
-  color: black;
+  color: white;
   z-index: 50;
 }
 #info-button:hover {
   cursor: pointer;
-  color: #111;
+  color: #eee;
 }
 
 #modal {
@@ -161,6 +172,15 @@ input:disabled input[type='submit']:hover {
   color: #eee;
 }
 
+#details {
+  margin: 10px;
+  padding: 10px;
+  width: 100%;
+  background-color: #777;
+  text-align: left;
+  margin-top: 20px;
+}
+
 @media screen and (max-width: 1100px) {
   .column {
     width: 100%;
@@ -169,8 +189,8 @@ input:disabled input[type='submit']:hover {
     margin: 0 0 30px 0;
   }
 }
-@media screen and (max-height: 900px) {
+/* @media screen and (max-height: 900px) {
   #color {
     margin-top: 300px !important;
   }
-}
+} */

@@ -85,7 +85,7 @@ export class Map {
     )
   }
 
-  /** get the index of a tile given row and column */
+  /** get the index of a tile given row and column wrapping if it is outside of range */
   get(i: number, j: number) {
     // wrap coords
     if (i < 0) i = this.rowLength + i
@@ -113,9 +113,9 @@ export class Map {
     const creatures = this.creatures
     const c = this.creatures[i]!
 
-    // can at maximum be in the top right corner which is 2*diagonal of grid square ~ 3
+    // can at maximum be in the top right corner which is (distance + start of block) * 2*sqrt(2) (~2.82)
     const distanceSquared = distance ** 2
-    const maxDistance = (distance + this.spacing * 3) ** 2
+    const maxDistance = ((distance + this.spacing) * 2.83) ** 2
 
     const neigbors = this.nearestNeighborsFromGrid(i, distance)
     const w = this.width
@@ -144,10 +144,24 @@ export class Map {
             const qc = quadrant(w, h, c.position)
             const qn = quadrant(w, h, cn.position)
             // correct neighbor position to mirror the location
-            dir = pn
-              .clone()
-              .add(getWrapCorrection(w, h, qc, qn))
-              .sub(c.position)
+            try {
+              dir = pn
+                .clone()
+                .add(getWrapCorrection(w, h, qc, qn))
+                .sub(c.position)
+            } catch (e) {
+              console.error(
+                'Error in wrap correction',
+                qc,
+                qn,
+                c.position,
+                cn.position,
+                dir,
+                dir.mag2(),
+                distance,
+              )
+              throw e
+            }
           }
 
           const dirMag2 = dir.mag2()

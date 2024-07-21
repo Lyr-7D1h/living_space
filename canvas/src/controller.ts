@@ -2,6 +2,9 @@ import iro from '@jaames/iro'
 import { type Connection, connect } from './connection'
 import { error } from './util'
 import { CONSTANTS } from './constants'
+import { Creature } from './creature'
+import { vec } from './vec'
+import { Color } from './color'
 
 const colorPicker = iro.ColorPicker('#color', {
   width: 300,
@@ -60,14 +63,13 @@ export function setupCreator(
     ctx.fill()
   })
 
-  const submit = document.getElementById('submit')!
-  submit.removeAttribute('disabled')
+  const createButton = document.getElementById('create-button')!
+  createButton.removeAttribute('disabled')
 
   const form = document.getElementById(
     'creature_creator_form',
   )! as HTMLFormElement
-  form.onsubmit = (e) => {
-    e.preventDefault()
+  const creatureArgs = () => {
     const data = new FormData(form)
 
     const scale = (x: number) => Math.floor(x * (canvasWidth / 500))
@@ -80,9 +82,7 @@ export function setupCreator(
       .substring(1)
       .match(/.{2}/g)!
       .map((x: string) => parseInt(x, 16)) as [number, number, number]
-
-    connection.send({
-      type: 'create',
+    return {
       position: [scale(position[0]), scale(position[1])],
       size: 2,
       color,
@@ -93,13 +93,55 @@ export function setupCreator(
         agreeableness: parseInt(data.get('agreeableness')! as string),
         neuroticism: parseInt(data.get('neuroticism')! as string),
       },
+    }
+  }
+  form.onsubmit = (e) => {
+    e.preventDefault()
+
+    connection.send({
+      type: 'create',
+      ...creatureArgs(),
     })
-    submit.setAttribute('disabled', '')
+    createButton.setAttribute('disabled', '')
     setTimeout(() => {
-      submit.removeAttribute('disabled')
+      createButton.removeAttribute('disabled')
     }, 2000)
   }
 
+  const detailsButton = document.getElementById('details-button')!
+  const details = document.getElementById('details')!
+  detailsButton.onclick = () => {
+    if (details.style.display === 'none') {
+      details.style.display = 'block'
+      return
+    }
+    details.style.display = 'none'
+  }
+  const updateDetails = () => {
+    const args = creatureArgs()
+    const creature = new Creature(0, {
+      position: vec<2>(...args.position),
+      size: args.size,
+      color: new Color(args.color),
+      personality: args.personality,
+      ancestors: new Set(),
+    })
+    details.innerHTML = JSON.stringify(
+      {
+        coloringSpread: creature.coloringSpread,
+        coloringPercentage: creature.coloringPercentage,
+        speed: creature.speed,
+        attraction: creature.attraction,
+        viewport: creature.viewport,
+        preference: creature.preference.p,
+        size: creature.size,
+      },
+      null,
+      '\t',
+    )
+  }
+  updateDetails()
+  form.onchange = updateDetails
   console.log('creator setup')
 }
 

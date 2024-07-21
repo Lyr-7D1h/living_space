@@ -25,6 +25,7 @@ export class Simulation {
   ctx: CanvasRenderingContext2D
   painting: Rasterizer
   creatures: Creature[]
+  viewdistance: number
 
   constructor() {
     this.canvas = document.getElementById('root')! as HTMLCanvasElement
@@ -43,6 +44,10 @@ export class Simulation {
     this.painting = new Rasterizer(
       this.ctx.createImageData(this.canvas.width, this.canvas.height),
     )
+    this.viewdistance =
+      Math.min(this.canvas.height, this.canvas.width) / 2 - 150
+
+    debug('Created simulation with viewdistance', this.viewdistance)
   }
 
   get width() {
@@ -175,7 +180,7 @@ export class Simulation {
       c.update()
       for (const [cni, dir, dirMag2] of map.nearestNeighbors(
         ci,
-        CONSTANTS.CREATURE_VIEWDISTANCE,
+        this.viewdistance,
       )) {
         // collision detection
         if (dirMag2 < c.size ** 2) {
@@ -196,7 +201,9 @@ export class Simulation {
         }
         c.updateWalk(dir)
       }
-
+    }
+    for (let ci = 0; ci < this.creatures.length; ci++) {
+      const c = this.creatures[ci]!
       // move creature
       c.step()
       const { x, y } = c.position

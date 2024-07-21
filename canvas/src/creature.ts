@@ -20,7 +20,6 @@ export interface Personality {
 
 export interface CreatureArgs {
   position: Vector<2>
-  size: number
   color: Color
   ancestors: Set<number>
   personality: Personality
@@ -42,7 +41,6 @@ export class Creature {
   name: number
   ancestors: Set<number>
   position: Vector<2>
-  size: number
   color: Color
   coloringPercentage: number
   coloringSpread: number
@@ -60,17 +58,17 @@ export class Creature {
     const x = () => Math.floor(Math.random() * window.innerWidth)
     const y = () => Math.floor(Math.random() * window.innerHeight)
     const c = () => Math.floor(Math.random() * 255)
+    const rand = () => Math.floor(Math.random() * 100)
     return new Creature(Math.random(), {
       position: vec(x(), y()),
       color: new Color(c(), c(), c()),
-      size: 2,
       ancestors: new Set(),
       personality: {
-        openness: Math.random(),
-        conscientiousness: Math.random(),
-        extraversion: Math.random(),
-        agreeableness: Math.random(),
-        neuroticism: Math.random(),
+        openness: rand(),
+        conscientiousness: rand(),
+        extraversion: rand(),
+        agreeableness: rand(),
+        neuroticism: rand(),
       },
       ...args,
     })
@@ -80,7 +78,6 @@ export class Creature {
     this.name = name
     this.ancestors = args.ancestors
     this.position = args.position
-    this.size = args.size
     this.color = args.color
     const personality = args.personality
 
@@ -114,9 +111,9 @@ export class Creature {
     preference[0] *= 1.5 - openness
     this.preference = CDF.fromWeights(preference)
 
-    this.attraction = roundTwoDec(1 - conscientiousness * 2)
+    this.attraction = roundTwoDec((personality.conscientiousness - 50) / 50)
     this.walk = this.preference.clone()
-    this.viewport = extraversion
+    this.viewport = 0.25 + extraversion
 
     this.personality = personality
   }
