@@ -1,73 +1,34 @@
-use std::{sync::Arc, time::Duration};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
-use futures_util::{stream::IntoStream, FutureExt, SinkExt, TryStreamExt};
 use log::{error, info};
+use uuid::Uuid;
 
 use anyhow::{anyhow, Context, Result};
 
-use serde::{Deserialize, Serialize};
+use crate::message_stream::{Config, ConnectionType, Message};
+
+use super::message_stream::MessageStream;
+
 use tokio::{
     net::{TcpListener, TcpStream, ToSocketAddrs},
     sync::{
-        broadcast::{self, Receiver, Sender},
+        mpsc::{self, Receiver, Sender},
         Mutex,
     },
     time::sleep,
 };
-use tokio_tungstenite::{
-    tungstenite::{self},
-    WebSocketStream,
-};
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-#[serde(tag = "type")]
-#[serde(rename_all = "snake_case")]
-pub enum Message {
-    Error {
-        message: String,
-    },
-    Init {
-        connection_type: ConnectionType,
-    },
-    Config(Config),
-    Create {
-        position: Vec<u32>,
-        size: u32,
-        color: Vec<u32>,
-        personality: Personality,
-    },
-}
-#[derive(Debug, Deserialize, Serialize, Clone)]
-#[serde(rename_all = "snake_case")]
-pub enum ConnectionType {
-    Canvas,
-    Controller,
+#[derive(Debug, Clone)]
+pub struct Canvas {
+    tx: Sender<Message>,
+    config: Config,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-#[serde(rename_all = "snake_case")]
-pub struct Personality {
-    openness: u32,
-    conscientiousness: u32,
-    extraversion: u32,
-    agreeableness: u32,
-    neuroticism: u32,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-#[serde(rename_all = "snake_case")]
-pub struct Config {
-    width: u32,
-    height: u32,
-}
-
-pub struct State {
-    latest_config: Option<Config>,
-}
+type State = Arc<Mutex<HashMap<String, Canvas>>>;
 
 pub struct Broadcaster {
     listener: TcpListener,
-    state: Arc<Mutex<State>>,
+    state: State,
 }
 
 impl Broadcaster {
@@ -76,23 +37,18 @@ impl Broadcaster {
 
         return Ok(Broadcaster {
             listener,
-            state: Arc::new(Mutex::new(State {
-                latest_config: None,
-            })),
+            state: Arc::new(Mutex::new(HashMap::new())),
         });
     }
 
     pub async fn listen(self) -> Result<()> {
         info!("Listening on: {:?}", self.listener.local_addr()?);
-        let (tx, rx) = broadcast::channel::<Message>(100);
 
         let mut handles = vec![];
         while let Ok((mut stream, _)) = self.listener.accept().await {
             let state = self.state.clone();
-            let tx = tx.clone();
-            let rx = tx.subscribe();
             let handle = tokio::spawn(async move {
-                let (ws_stream, contype) = match init(&mut stream).await {
+                let (msg_stream, contype) = match init(&mut stream).await {
                     Ok(r) => r,
                     Err(e) => {
                         error!("Closing session to {:?}", stream.peer_addr());
@@ -101,9 +57,19 @@ impl Broadcaster {
                     }
                 };
 
-                if let Err(e) = session(ws_stream, contype, state, tx, rx).await {
-                    error!("Closing session to {:?}", stream.peer_addr());
-                    error!("{e}")
+                match contype {
+                    ConnectionType::Canvas => {
+                        if let Err(e) = canvas(msg_stream, state).await {
+                            error!("Closing session to {:?}", stream.peer_addr());
+                            error!("{e}")
+                        }
+                    }
+                    ConnectionType::Controller { id } => {
+                        if let Err(e) = controller(id, msg_stream, state).await {
+                            error!("Closing session to {:?}", stream.peer_addr());
+                            error!("{e}")
+                        }
+                    }
                 }
             });
             handles.push(handle)
@@ -113,95 +79,101 @@ impl Broadcaster {
     }
 }
 
-type WSStream<'n> = IntoStream<WebSocketStream<&'n mut TcpStream>>;
-
-async fn init(stream: &mut TcpStream) -> Result<(WSStream, ConnectionType)> {
+async fn init(stream: &mut TcpStream) -> Result<(MessageStream, ConnectionType)> {
     let addr = stream
         .peer_addr()
         .context("connected streams should have a peer address")?;
     info!("Peer address: {}", addr);
 
-    let mut ws_stream = tokio_tungstenite::accept_async(stream)
-        .await
-        .context("Error during the websocket handshake occurred")?
-        .into_stream();
+    let mut stream = MessageStream::new(stream).await?;
 
     // wait for init
-    let msg = ws_stream.try_next().await;
-    let message = msg
-        .map(|m| m.ok_or(anyhow!("no message given")))
-        .context("error occurred while reading from stream")??;
-    let command: Message = match message {
-        tungstenite::Message::Text(text) => {
-            serde_json::from_str(&text).context("failed to parse message")?
-        }
-        tungstenite::Message::Close(_) => return Err(anyhow!("closing early")),
-        _ => return Err(anyhow!("invalid message data type")),
-    };
-    match command {
-        Message::Init { connection_type } => return Ok((ws_stream, connection_type)),
+    let message = stream.read().await?;
+    let connection_type = match message {
+        Message::Init(connection_type) => connection_type,
         _ => return Err(anyhow!("no init given")),
+    };
+
+    return Ok((stream, connection_type));
+}
+
+async fn controller<'n>(id: String, mut stream: MessageStream<'n>, state: State) -> Result<()> {
+    let canvas = {
+        match state.lock().await.get(&id) {
+            Some(c) => c.clone(),
+            None => {
+                stream
+                    .send(Message::Error {
+                        message: format!("canvas '{id}' not found"),
+                    })
+                    .await?;
+                return Err(anyhow!("canvas '{id}' not found"));
+            }
+        }
+    };
+
+    stream.send(Message::Config(canvas.config.clone())).await?;
+
+    loop {
+        let message = stream.read().await?;
+        match message {
+            Message::Create { .. } => {
+                canvas.tx.send(message).await?;
+            }
+            _ => {}
+        }
+        sleep(Duration::from_millis(50)).await;
     }
 }
 
-async fn session<'n>(
-    mut stream: WSStream<'n>,
-    connection_type: ConnectionType,
-    state: Arc<Mutex<State>>,
-    tx: Sender<Message>,
-    mut rx: Receiver<Message>,
-) -> Result<()> {
-    if let ConnectionType::Controller = connection_type {
-        if let Some(config) = &(state.lock().await).latest_config {
-            tx.send(Message::Config(config.clone()))?;
+async fn canvas<'n>(mut stream: MessageStream<'n>, state: State) -> Result<()> {
+    let config = match stream.read().await? {
+        Message::Config(c) => c,
+        _ => {
+            stream.send(Message::error("expected config")).await?;
+            return Err(anyhow!("expected config"));
         }
+    };
+
+    let (tx, rx) = mpsc::channel::<Message>(10);
+    let id = Uuid::new_v4().to_string();
+    {
+        let mut state = state.lock().await;
+        state.insert(id.clone(), Canvas { tx, config });
+    }
+    stream.send(Message::Id { id: id.clone() }).await?;
+
+    if let Err(e) = canvas_listener(&id.clone(), stream, rx, state.clone()).await {
+        let mut state = state.lock().await;
+        state.remove(&id);
+        return Err(e);
     }
 
-    loop {
-        if let Some(msg) = stream.try_next().now_or_never() {
-            if let Some(message) = msg.context("error occurred while reading from stream")? {
-                let command: Result<Message, serde_json::Error> = match message {
-                    tungstenite::Message::Text(text) => serde_json::from_str(&text),
-                    tungstenite::Message::Close(_) => return Ok(()),
-                    _ => return Err(anyhow!("invalid message data type")),
-                };
+    Ok(())
+}
 
-                // update latest config if new config set
-                match command {
-                    Ok(command) => {
-                        match command {
-                            Message::Config(ref c) => {
-                                let mut s = state.lock().await;
-                                s.latest_config = Some(c.clone());
-                            }
-                            _ => {}
-                        }
-                        tx.send(command)?;
-                    }
-                    Err(e) => {
-                        error!("{e}");
-                        let message = Message::Error {
-                            message: format!("failed to parse message: {e}"),
-                        };
-                        let value =
-                            serde_json::to_string(&message).context("failed to send message")?;
-                        stream.send(tungstenite::Message::Text(value)).await?;
-                    }
+async fn canvas_listener<'n>(
+    id: &String,
+    mut stream: MessageStream<'n>,
+    mut rx: Receiver<Message>,
+    state: State,
+) -> Result<()> {
+    loop {
+        if let Some(msg) = stream.read_now().await? {
+            // update latest config if new config set
+            match msg {
+                Message::Config(ref c) => {
+                    let mut s = state.lock().await;
+                    s.get_mut(id).context("unexpectedly removed")?.config = c.clone();
                 }
+                _ => {}
             }
         };
 
         if let Ok(cmd) = rx.try_recv() {
             match cmd {
-                Message::Config(_) => {
-                    let value = serde_json::to_string(&cmd).context("failed to send cmd")?;
-                    stream.send(tungstenite::Message::Text(value)).await?;
-                }
                 Message::Create { .. } => {
-                    if let ConnectionType::Canvas = connection_type {
-                        let value = serde_json::to_string(&cmd).context("failed to send cmd")?;
-                        stream.send(tungstenite::Message::Text(value)).await?;
-                    }
+                    stream.send(cmd).await?;
                 }
                 _ => {}
             }

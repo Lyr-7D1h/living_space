@@ -38,10 +38,13 @@ export function setupCreator(
   // setup position canvas to get starting position
   const posCanvas = document.getElementById('position')! as HTMLCanvasElement
   posCanvas.width =
-    document.getElementById('position-content')!.clientWidth - 50
-  posCanvas.height = 500 * (canvasHeight / canvasWidth)
+    document.getElementById('position-content')!.clientWidth * 0.9
+  posCanvas.height = (posCanvas.width * canvasHeight) / canvasWidth
   const ctx = posCanvas.getContext('2d')!
-  let position: [number, number] = [posCanvas.width / 2, posCanvas.height / 2]
+  let position: [number, number] = [
+    Math.round(posCanvas.width / 2),
+    Math.round(posCanvas.height / 2),
+  ]
   ctx.fillStyle = colorPicker.color.hexString
   ctx.beginPath()
   ctx.arc(position[0], position[1], 5, 0, 2 * Math.PI)
@@ -72,7 +75,7 @@ export function setupCreator(
   const creatureArgs = () => {
     const data = new FormData(form)
 
-    const scale = (x: number) => Math.floor(x * (canvasWidth / 500))
+    const scale = (i: number) => Math.floor(i * (canvasWidth / posCanvas.width))
 
     const color = colorPicker.color.hexString
       .replace(
@@ -83,8 +86,7 @@ export function setupCreator(
       .match(/.{2}/g)!
       .map((x: string) => parseInt(x, 16)) as [number, number, number]
     return {
-      position: [scale(position[0]), scale(position[1])],
-      size: 2,
+      position: [scale(position[0]), scale(position[1])] as [number, number],
       color,
       personality: {
         openness: parseInt(data.get('openness')! as string),
@@ -109,8 +111,10 @@ export function setupCreator(
   }
 
   const detailsButton = document.getElementById('details-button')!
+  detailsButton.removeAttribute('disabled')
   const details = document.getElementById('details')!
   detailsButton.onclick = () => {
+    console.log(details.style.display)
     if (details.style.display === 'none') {
       details.style.display = 'block'
       return
@@ -121,7 +125,6 @@ export function setupCreator(
     const args = creatureArgs()
     const creature = new Creature(0, {
       position: vec<2>(...args.position),
-      size: args.size,
       color: new Color(args.color),
       personality: args.personality,
       ancestors: new Set(),
@@ -134,7 +137,6 @@ export function setupCreator(
         attraction: creature.attraction,
         viewport: creature.viewport,
         preference: creature.preference.p,
-        size: creature.size,
       },
       null,
       '\t',
@@ -146,21 +148,26 @@ export function setupCreator(
 }
 
 async function sync() {
-  let connection = await connect(CONSTANTS.SYNC_SERVER_URL).catch((e) => {
+  const connection = await connect(CONSTANTS.SYNC_SERVER_URL).catch((e) => {
     error(e)
   })
-  while (typeof connection === 'undefined') {
-    connection = await connect(CONSTANTS.SYNC_SERVER_URL).catch((e) => {
-      error(e)
-    })
+  if (typeof connection === 'undefined') {
+    setTimeout(async () => await sync().catch(error), 1000)
+    return
   }
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   connection.on('close', async () => {
-    await sync()
+    setTimeout(async () => await sync().catch(error), 1000)
   })
+  const id = new URLSearchParams(window.location.search).get('id')
+  if (id === null) {
+    error('no id provided')
+    return
+  }
   connection.send({
     type: 'init',
     connection_type: 'controller',
+    id,
   })
 
   connection.on('message', (d) => {

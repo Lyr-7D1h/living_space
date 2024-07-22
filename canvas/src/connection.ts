@@ -29,8 +29,14 @@ export async function connect(addr: string): Promise<Connection> {
 export type Message =
   | {
       type: 'init'
-      connection_type: 'canvas' | 'controller'
+      connection_type: 'canvas'
     }
+  | {
+      type: 'init'
+      connection_type: 'controller'
+      id: string
+    }
+  | { type: 'id'; id: string }
   | {
       type: 'config'
       width: number
@@ -39,7 +45,6 @@ export type Message =
   | {
       type: 'create'
       position: [number, number]
-      size: number
       color: [number, number, number]
       personality: Personality
     }

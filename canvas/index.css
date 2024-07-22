@@ -11,6 +11,15 @@ body {
   bottom: 0;
   right: 0;
 }
+#qr {
+  z-index: 999;
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+}
+#qr:hover {
+  cursor: pointer;
+}
 #debug {
   position: absolute;
   color: black;

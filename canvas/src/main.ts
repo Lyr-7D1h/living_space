@@ -1,3 +1,4 @@
+import QrCreator from 'qr-creator'
 import { Color } from './color'
 import { connect } from './connection'
 import { CONSTANTS } from './constants'
@@ -21,14 +22,15 @@ async function sync() {
     url = `ws://${host}:7543`
   }
 
-  let connection = await connect(url).catch((e) => {
+  const connection = await connect(url).catch((e) => {
     error(e)
   })
 
-  while (typeof connection === 'undefined') {
-    connection = await connect(url).catch((e) => {
-      error(e)
-    })
+  if (typeof connection === 'undefined') {
+    setTimeout(() => {
+      sync().catch(error)
+    }, 500)
+    return
   }
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -49,10 +51,25 @@ async function sync() {
     connection.on('message', (d) => {
       const cmd = d
       switch (cmd.type) {
+        case 'id': {
+          const href = `${CONSTANTS.CONTROLLER_URL}?id=${cmd.id}`
+          document.getElementById('qr-link')!.setAttribute('href', href)
+          QrCreator.render(
+            {
+              text: href,
+              radius: 0.3, // 0.0 to 0.5
+              ecLevel: 'H', // L, M, Q, H
+              fill: '#000', // foreground color
+              background: '#ffffff66', // color or null for transparent
+              size: 128, // in pixels
+            },
+            document.getElementById('qr')!,
+          )
+          break
+        }
         case 'create': {
           const creature = new Creature(simulation.creatures.length, {
             position: vec(...cmd.position),
-            size: cmd.size,
             color: new Color(cmd.color),
             personality: cmd.personality,
             ancestors: new Set(),
