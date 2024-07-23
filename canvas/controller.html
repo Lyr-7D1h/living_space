@@ -16,11 +16,31 @@
         <h1>Living Space</h1>
         <p>
           Welcome to Living Space! This is a simulation of a small ecosystem
-          where creatures interact with each other and their environment. You
-          can create new creatures by clicking on the canvas. Each creature has
-          a unique personality that influences how they interact with their
-          environment and other creatures. You can also change the environment
-          by clicking and dragging the background. Have fun!
+          where creatures interact with each other and their environment. Each
+          creature has a unique personality based on the
+          <a href="https://en.wikipedia.org/wiki/Big_Five_personality_traits">
+            Big Five personality trait
+          </a>
+          that influences how they walk and interact with other creatures. For
+          example a very caring creature gets very attracted to other creatures
+          or a more introverted creature will avoid other creatures and stay
+          more in place.
+        </p>
+        <p>
+          The idea is that over time you will have a living colorful ecosystem
+          that will change and adapt over time all based on the initial
+          creatures you create. Resembling the way our society works and
+          interacts with each other.
+        </p>
+        Code:
+        <a href="https://github.com/Lyr-7D1h/living_space"
+          >https://github.com/Lyr-7D1h/living_space</a
+        >
+        <p>
+          <b>Note:</b><br />
+          You can figure out the details for the creature you create by pressing
+          details and figuring out which personality trait corresponds to what
+          specification.
         </p>
       </div>
     </div>
@@ -107,7 +127,12 @@
               </div>
               <div class="text">Confident</div>
             </div>
-            <input id="create-button" type="submit" value="Create" disabled />
+            <input
+              id="create-button"
+              type="submit"
+              value="Create Creature"
+              disabled
+            />
             <button id="details-button" type="button" disabled>Details</button>
             <pre id="details" style="display: none"></pre>
           </div>

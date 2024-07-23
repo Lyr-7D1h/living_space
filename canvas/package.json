@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/main.ts",
   "scripts": {
-    "start": "vite",
+    "start": "vite -m dev",
     "build": "vite build",
     "format": "prettier -w src/",
     "lint": "eslint src/**/*"

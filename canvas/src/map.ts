@@ -54,7 +54,7 @@ export class Map {
 
     for (const c of this.creatures) {
       const i = this.getIndex(c.position)
-      this.cellStart[i]++
+      this.cellStart[i] += 1
     }
 
     let start = 0

@@ -1,12 +1,12 @@
 export const CONSTANTS = {
-  CONTROLLER_URL: 'http://localhost:7541/controller',
-  SYNC_SERVER_URL: 'ws://localhost:7543',
-  DEBUG_INFO: true,
-  ASSERTS: false,
-  DEBUG_VISUAL: false,
-  CONSTANT_TIME_S: 0,
-  COUNT_START_CREATURES: 0,
-  QR: true,
+  CONTROLLER_URL: import.meta.env.VITE_CONTROLLER_URL,
+  SYNC_SERVER_URL: import.meta.env.VITE_SYNC_SERVER_URL,
+  DEBUG_INFO: import.meta.env.VITE_DEBUG_INFO === 'true',
+  ASSERTS: import.meta.env.VITE_ASSERTS === 'true',
+  DEBUG_VISUAL: import.meta.env.VITE_DEBUG_VISUAL === 'true',
+  CONSTANT_TIME_S: Number(import.meta.env.VITE_CONSTANT_TIME_S),
+  COUNT_START_CREATURES: Number(import.meta.env.VITE_COUNT_START_CREATURES),
+  QR: import.meta.env.VITE_QR === 'true',
 }
 
 for (const key in CONSTANTS) {

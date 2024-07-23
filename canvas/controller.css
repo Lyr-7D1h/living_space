@@ -148,8 +148,8 @@ input:disabled input[type='submit']:hover {
 }
 #modal-close-button {
   position: fixed;
-  top: 0;
-  right: 0;
+  top: 10px;
+  right: 10px;
   font-size: 2em;
   padding: 10px;
 }

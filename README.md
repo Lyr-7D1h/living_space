@@ -1,6 +1,18 @@
 # Living Space
 
-Make creatures with different characteristics that will interact with each other, create offsprings, build and procreate.
+Welcome to Living Space! This is a simulation of a small ecosystem
+where creatures interact with each other and their environment. Each
+creature has a unique personality based on the
+<a href="https://en.wikipedia.org/wiki/Big_Five_personality_traits">Big Five personality trait</a>
+that influences how they walk and interact with other creatures. For
+example a very caring creature gets very attracted to other creatures
+or a more introverted creature will avoid other creatures and stay
+more in place.
+
+The idea is that over time you will have a living colorful ecosystem
+that will change and adapt over time all based on the initial
+creatures you create. Resembling the way our society works and
+interacts with each other.
 
 ## Ideas
 - procreate with other creatures
@@ -9,7 +21,29 @@ Make creatures with different characteristics that will interact with each other
 - Running canvas state on a server
 - Make steps independent of fps
 
-## Kiosk
+# Build
+
+```sh
+cd canvas
+```
+
+Configure `.env.dev` to point to your URL and to set how much information to show
+
+```sh
+npm run build
+```
+
+See `./dist/` for build files
+
+```sh
+cd ../broadcaster
+cargo build --release
+```
+
+See `./target/release/broadcaster` for the broadcaster binary
+
+
+## PI Kiosk
 
 For setting up a kiosk device with a pi I followed https://reelyactive.github.io/diy/pi-kiosk/
 
@@ -65,6 +99,3 @@ cargo run
 
 chromium-browser --display=:0 --kiosk --incognito --window-position=0,0 http://localhost:5174
 ```
-
-## Roadmap
-- Use voronoi and trapezoidal maps for nearest neighbor search https://stackoverflow.com/questions/1901139/closest-point-to-a-given-point

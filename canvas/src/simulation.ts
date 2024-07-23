@@ -182,7 +182,8 @@ export class Simulation {
         this.viewdistance,
       )) {
         // collision detection
-        if (dirMag2 < c.size ** 2) {
+        // if it is inside of other creature (creature size: 3 ** 2)
+        if (dirMag2 < 9) {
           const args = c.procreate(this.creatures[cni]!)
           if (args !== null) {
             // this.addCreature(new Creature(this.creatures.length, args))
