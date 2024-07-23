@@ -1,3 +1,5 @@
+import { CONSTANTS } from './constants'
+
 export class DebugInfo {
   html: HTMLElement
   values: Record<string, any>
@@ -13,9 +15,11 @@ export class DebugInfo {
   }
 
   render() {
-    this.html.innerHTML = Object.entries(this.values)
-      .map(([k, v]) => `${k}: ${v}`)
-      .join('<br />')
+    if (CONSTANTS.DEBUG_INFO) {
+      this.html.innerHTML = Object.entries(this.values)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join('<br />')
+    }
   }
 }
 

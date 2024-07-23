@@ -1,5 +1,7 @@
 # Living Space
 
+![](./docs/showcase.webm)
+
 Welcome to Living Space! This is a simulation of a small ecosystem
 where creatures interact with each other and their environment. Each
 creature has a unique personality based on the
