@@ -6,6 +6,7 @@ export const CONSTANTS = {
   DEBUG_VISUAL: false,
   CONSTANT_TIME_S: 0,
   COUNT_START_CREATURES: 0,
+  QR: true,
 }
 
 for (const key in CONSTANTS) {

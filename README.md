@@ -3,14 +3,8 @@
 Make creatures with different characteristics that will interact with each other, create offsprings, build and procreate.
 
 ## Ideas
-- creature
-  - color
-  - behavior characteristics
-  - tendencies
-  - make connections with other creatures
-  - procreate with other creatures
+- procreate with other creatures
 - on death explode color to neighboring tiles
-- different color space
 - add anti-aliasing
 - Running canvas state on a server
 - Make steps independent of fps

@@ -1,4 +1,4 @@
-export class Debug {
+export class DebugInfo {
   html: HTMLElement
   values: Record<string, any>
 
@@ -18,3 +18,5 @@ export class Debug {
       .join('<br />')
   }
 }
+
+export const debugInfo = new DebugInfo()

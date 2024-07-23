@@ -52,19 +52,21 @@ async function sync() {
       const cmd = d
       switch (cmd.type) {
         case 'id': {
-          const href = `${CONSTANTS.CONTROLLER_URL}?id=${cmd.id}`
-          document.getElementById('qr-link')!.setAttribute('href', href)
-          QrCreator.render(
-            {
-              text: href,
-              radius: 0.3, // 0.0 to 0.5
-              ecLevel: 'H', // L, M, Q, H
-              fill: '#000', // foreground color
-              background: '#ffffff66', // color or null for transparent
-              size: 128, // in pixels
-            },
-            document.getElementById('qr')!,
-          )
+          if (CONSTANTS.QR) {
+            const href = `${CONSTANTS.CONTROLLER_URL}?id=${cmd.id}`
+            document.getElementById('qr-link')!.setAttribute('href', href)
+            QrCreator.render(
+              {
+                text: href,
+                radius: 0.3, // 0.0 to 0.5
+                ecLevel: 'H', // L, M, Q, H
+                fill: '#000', // foreground color
+                background: '#ffffff66', // color or null for transparent
+                size: 128, // in pixels
+              },
+              document.getElementById('qr')!,
+            )
+          }
           break
         }
         case 'create': {

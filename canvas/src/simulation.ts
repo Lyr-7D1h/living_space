@@ -4,18 +4,16 @@ import { Creature } from './creature'
 import { debug } from './log'
 import { vec } from './vec'
 import { Rasterizer } from './rasterizer'
-import { Debug } from './debug'
 import { Map } from './map'
-
-const debugEl = new Debug()
+import { debugInfo } from './debug_info'
 
 function perf(cb: () => void) {
   const start = Date.now()
   cb()
   const d = Date.now() - start
   if (CONSTANTS.DEBUG_INFO) {
-    debugEl.set('fps', `${Math.round(1000 / d)}`)
-    debugEl.set('delay', `${d}ms`)
+    debugInfo.set('fps', `${Math.round(1000 / d)}`)
+    debugInfo.set('delay', `${d}ms`)
   }
 }
 
@@ -46,6 +44,7 @@ export class Simulation {
     )
     this.viewdistance =
       Math.min(this.canvas.height, this.canvas.width) / 2 - 150
+    debugInfo.set('viewdistance', this.viewdistance)
 
     debug('Created simulation with viewdistance', this.viewdistance)
   }
@@ -109,7 +108,7 @@ export class Simulation {
 
   private drawLoop(map: Map) {
     if (CONSTANTS.DEBUG_INFO) {
-      debugEl.set('pixels', this.creatures.length)
+      debugInfo.set('pixels', this.creatures.length)
     }
 
     map.update()
