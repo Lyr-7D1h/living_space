@@ -20,6 +20,7 @@ interacts with each other.
 - add anti-aliasing
 - Running canvas state on a server
 - Make steps independent of fps
+- Animated creatures instead of pixels (https://www.youtube.com/watch?v=qlfh_rv6khY)
 
 # Build
 
