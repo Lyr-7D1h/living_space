@@ -3,7 +3,7 @@
   font-style: normal;
   font-weight: 20;
   font-display: block;
-  src: url('./lib/UbuntuMono-Regular.ttf') format('truetype');
+  src: url('../lib/UbuntuMono-Regular.ttf') format('truetype');
 }
 body {
   padding: 0;

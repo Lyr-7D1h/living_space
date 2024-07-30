@@ -24,6 +24,7 @@ jobs:
           docker buildx create --name builder
           docker buildx use builder
       - name: Build and push
+        working-directory: ./broadcaster
         run: |
           docker buildx build --push \
             --tag "${{secrets.DOCKERHUB_USER}}/living_space_broadcaster:${GITHUB_SHA::8}" \
