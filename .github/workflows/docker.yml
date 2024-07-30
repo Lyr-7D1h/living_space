@@ -29,4 +29,4 @@ jobs:
           docker buildx build --push \
             --tag "${{secrets.DOCKERHUB_USER}}/living_space_broadcaster:${GITHUB_SHA::8}" \
             --tag "${{secrets.DOCKERHUB_USER}}/living_space_broadcaster:latest" \
-            --platform linux/amd64,linux/arm/v7,linux/arm/v8 .
+            --platform linux/amd64,linux/arm/v7 .
