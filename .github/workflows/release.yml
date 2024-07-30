@@ -49,6 +49,6 @@ jobs:
           VITE_QR: false
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist.zip
+          asset_path: ./canvas/dist.zip
           asset_name: dist.zip
           asset_content_type: application/zip
