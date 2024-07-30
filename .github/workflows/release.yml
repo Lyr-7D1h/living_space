@@ -26,6 +26,7 @@ jobs:
       - name: Build dist.zip
         working-directory: ./canvas
         run: |
+          npm ci
           npm run build
           zip -r dist.zip dist
       - name: Upload Release Asset
