@@ -11,10 +11,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Remove latest
-        uses: liudonghua123/delete-release-action@v1
+      - uses: wow-actions/delete-stale-releases@v1
         with:
-          release_name: Latest
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          keep_latest_count: 0
+          delete_tags: true
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
