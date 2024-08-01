@@ -11,4 +11,4 @@ fi
 
 rustup target add $target 
 cargo build --release --target=$target
-mv target/$target/release/ broadcaster
+mv target/$target/release/broadcaster broadcaster

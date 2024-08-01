@@ -8,7 +8,10 @@ WORKDIR /broadcaster/
 
 COPY build.sh .
 RUN ./build.sh 
+RUN chmod +x broadcaster
+RUN ls -l
 
 FROM scratch
 COPY --from=builder /broadcaster/broadcaster /broadcaster
+EXPOSE 7543
 CMD ["/broadcaster"]

@@ -5,7 +5,8 @@
   "main": "src/main.ts",
   "scripts": {
     "start": "vite -m dev",
-    "build": "vite build",
+    "start:prod": "vite -m prod",
+    "build": "vite build -m prod",
     "format": "prettier -w src/",
     "lint": "eslint src/**/*"
   },

@@ -1,7 +1,10 @@
 import { type Personality } from './creature'
+import { info } from './util'
 
 /** Connect to socket in a blocking manner erroring in case of timeout or error */
 export async function connect(addr: string): Promise<Connection> {
+  info(`Connecting to ${addr}`)
+
   return await new Promise((resolve, reject) => {
     const connection = new Connection(addr)
 
