@@ -1,5 +1,8 @@
 # Living Space
 
+[![Create Release](https://github.com/Lyr-7D1h/living_space/actions/workflows/release.yml/badge.svg)](https://github.com/Lyr-7D1h/living_space/actions/workflows/release.yml)
+[![Docker Buildx](https://github.com/Lyr-7D1h/living_space/actions/workflows/docker.yml/badge.svg)](https://github.com/Lyr-7D1h/living_space/actions/workflows/docker.yml)
+
 Welcome to Living Space! This is a simulation of a small ecosystem
 where creatures interact with each other and their environment. Each
 creature has a unique personality based on the
