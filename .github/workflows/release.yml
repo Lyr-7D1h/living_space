@@ -37,8 +37,8 @@ jobs:
           VITE_ASSERTS: false
           VITE_DEBUG_VISUAL: false
           VITE_CONSTANT_TIME_S: 0
-          VITE_COUNT_START_CREATURES: 50
-          VITE_QR: false
+          VITE_COUNT_START_CREATURES: 0
+          VITE_QR: true
         run: |
           npm ci
           npm run build
