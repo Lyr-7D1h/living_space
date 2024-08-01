@@ -6,9 +6,9 @@ COPY src  /broadcaster/src
 COPY Cargo.toml Cargo.lock /broadcaster/
 WORKDIR /broadcaster/
 
-RUN rustup target add x86_64-unknown-linux-musl
-RUN cargo build --release --target=x86_64-unknown-linux-musl
+COPY build.sh .
+RUN ./build.sh 
 
 FROM scratch
-COPY --from=builder /broadcaster/target/x86_64-unknown-linux-musl/release/broadcaster /broadcaster
+COPY --from=builder /broadcaster/broadcaster /broadcaster
 CMD ["/broadcaster"]
