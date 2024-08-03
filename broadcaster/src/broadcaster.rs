@@ -52,7 +52,7 @@ impl Broadcaster {
                     Ok(r) => r,
                     Err(e) => {
                         error!("Closing session to {:?}", stream.peer_addr());
-                        error!("{e}");
+                        error!("{e:?}");
                         return;
                     }
                 };
@@ -61,13 +61,13 @@ impl Broadcaster {
                     ConnectionType::Canvas => {
                         if let Err(e) = canvas(msg_stream, state).await {
                             error!("Closing session to {:?}", stream.peer_addr());
-                            error!("{e}")
+                            error!("{e:?}")
                         }
                     }
                     ConnectionType::Controller { id } => {
                         if let Err(e) = controller(id, msg_stream, state).await {
                             error!("Closing session to {:?}", stream.peer_addr());
-                            error!("{e}")
+                            error!("{e:?}")
                         }
                     }
                 }
