@@ -115,10 +115,14 @@ async fn controller<'n>(id: String, mut stream: MessageStream<'n>, state: State)
     stream.send(Message::Config(canvas.config.clone())).await?;
 
     loop {
-        let message = stream.read().await?;
+        let message = stream.read().await.context("failed to read message")?;
         match message {
             Message::Create { .. } => {
-                canvas.tx.send(message).await?;
+                canvas
+                    .tx
+                    .send(message)
+                    .await
+                    .context("failed to send message")?;
             }
             _ => {}
         }
@@ -159,12 +163,14 @@ async fn canvas_listener<'n>(
     state: State,
 ) -> Result<()> {
     loop {
-        if let Some(msg) = stream.read_now().await? {
+        if let Some(msg) = stream.read_now().await.context("failed to read message")? {
             // update latest config if new config set
             match msg {
                 Message::Config(ref c) => {
                     let mut s = state.lock().await;
-                    s.get_mut(id).context("unexpectedly removed")?.config = c.clone();
+                    s.get_mut(id)
+                        .context(format!("unexpectedly removed {id}"))?
+                        .config = c.clone();
                 }
                 _ => {}
             }
@@ -173,7 +179,7 @@ async fn canvas_listener<'n>(
         if let Ok(cmd) = rx.try_recv() {
             match cmd {
                 Message::Create { .. } => {
-                    stream.send(cmd).await?;
+                    stream.send(cmd).await.context("failed to send message")?;
                 }
                 _ => {}
             }

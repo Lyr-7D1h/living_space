@@ -32,7 +32,7 @@ jobs:
         working-directory: ./canvas
         env:
           VITE_CONTROLLER_URL: https://lyrx.dev/living_space/controller
-          VITE_SYNC_SERVER_URL: ws://living-space-broadcaster.lyrx.dev
+          VITE_SYNC_SERVER_URL: wss://living-space-broadcaster.lyrx.dev
           VITE_DEBUG_INFO: false
           VITE_ASSERTS: false
           VITE_DEBUG_VISUAL: false

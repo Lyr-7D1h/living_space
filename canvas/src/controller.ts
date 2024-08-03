@@ -136,7 +136,7 @@ export function setupCreator(
         speed: creature.speed,
         attraction: creature.attraction,
         viewport: creature.viewport,
-        preference: creature.preference.p,
+        preference: creature.preference.p, // TODO: send preference to server
       },
       null,
       '\t',

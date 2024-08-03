@@ -14,6 +14,13 @@ simulation.start()
 
 // allow acccess through console useful for debugging
 window.simulation = simulation
+window.CONSTANTS = CONSTANTS
+declare global {
+  interface Window {
+    simulation: Simulation
+    CONSTANTS: typeof CONSTANTS
+  }
+}
 
 async function sync() {
   let url = SYNC_SERVER_URL
@@ -55,6 +62,8 @@ async function sync() {
           if (CONSTANTS.QR) {
             const href = `${CONSTANTS.CONTROLLER_URL}?id=${cmd.id}`
             document.getElementById('qr-link')!.setAttribute('href', href)
+            const qr = document.getElementById('qr')!
+            qr.innerHTML = '' // clear previous qr code
             QrCreator.render(
               {
                 text: href,
@@ -64,7 +73,7 @@ async function sync() {
                 background: '#ffffff66', // color or null for transparent
                 size: 128, // in pixels
               },
-              document.getElementById('qr')!,
+              qr,
             )
           }
           break
@@ -84,9 +93,3 @@ async function sync() {
   }
 }
 sync().catch(error)
-
-declare global {
-  interface Window {
-    simulation: Simulation
-  }
-}
