@@ -1,3 +1,4 @@
+import { CONSTANTS } from './constants'
 import { type Personality } from './creature'
 
 /** Connect to socket in a blocking manner erroring in case of timeout or error */
@@ -51,6 +52,7 @@ export type Message =
       personality: Personality
     }
   | { type: 'error'; message: string }
+  | { type: 'ping' }
 
 export class Connection {
   private readonly socket: WebSocket
@@ -61,6 +63,14 @@ export class Connection {
    */
   constructor(addr: string) {
     this.socket = new WebSocket(addr)
+
+    const ping = setInterval(() => {
+      if (this.socket.readyState !== 1) {
+        clearInterval(ping)
+        return
+      }
+      this.send({ type: 'ping' })
+    }, CONSTANTS.PING_TIMEOUT * 1000)
   }
 
   on(type: 'message', cb: (data: Message) => void): void

@@ -7,6 +7,7 @@ export const CONSTANTS = {
   CONSTANT_TIME_S: Number(import.meta.env.VITE_CONSTANT_TIME_S),
   COUNT_START_CREATURES: Number(import.meta.env.VITE_COUNT_START_CREATURES),
   QR: import.meta.env.VITE_QR === 'true',
+  PING_TIMEOUT: Number(import.meta.env.VITE_PING_TIMEOUT),
 }
 
 for (const key in CONSTANTS) {

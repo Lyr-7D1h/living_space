@@ -39,6 +39,7 @@ jobs:
           VITE_CONSTANT_TIME_S: 0
           VITE_COUNT_START_CREATURES: 0
           VITE_QR: true
+          VITE_PING_TIMEOUT: 45
         run: |
           npm ci
           npm run build
