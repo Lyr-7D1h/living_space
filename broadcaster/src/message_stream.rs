@@ -18,6 +18,7 @@ pub enum Message {
         id: String,
     },
     Config(Config),
+    Ping,
     Create {
         position: Vec<u32>,
         color: Vec<u32>,

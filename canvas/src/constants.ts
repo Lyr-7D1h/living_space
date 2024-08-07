@@ -17,6 +17,12 @@ for (const key in CONSTANTS) {
       CONSTANTS[key] = urlParam === 'true'
     } else if (typeof CONSTANTS[key]! === 'number') {
       CONSTANTS[key] = parseFloat(urlParam)
+      if (key === 'PING_TIMEOUT') {
+        // minimum of 1
+        if (CONSTANTS[key] < 1) {
+          CONSTANTS[key] = 1
+        }
+      }
     } else {
       CONSTANTS[key] = urlParam
     }
